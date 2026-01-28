@@ -25,4 +25,4 @@ Suggest a suitable tech stack
     - see Stylex related note in CLAUDE.md
     - there are some issues with installing Stylex. See project in /Users/janimattiellonen/Documents/Development/junnukisat.fi for reference. It is built using Vite and uses Stylex
 - install lint, prettier and typecheck       
-
+- for now, skip installing zustand or any other state management library. Also let's wait with installing any canvas related libraries

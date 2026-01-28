@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@stylexjs/stylex": "^0.16.3",
+    "@zumer/snapdom": "^2.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
