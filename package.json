@@ -14,10 +14,13 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@stylexjs/stylex": "^0.16.3",
     "@zumer/snapdom": "^2.0.2",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.71.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
