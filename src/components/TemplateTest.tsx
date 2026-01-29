@@ -1,9 +1,13 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent, type PointerEvent, type KeyboardEvent } from "react";
 import * as stylex from "@stylexjs/stylex";
 import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+type ImageTransform = { x: number; y: number; scale: number };
+
+const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
 
 const TEMPLATE_WIDTH = 551;
 const TEMPLATE_HEIGHT = 690;
@@ -136,6 +140,74 @@ const styles = stylex.create({
     width: "100%",
     height: "100%",
     objectFit: "cover",
+    touchAction: "none",
+    userSelect: "none",
+    transformOrigin: "0 0",
+    ":focus": {
+      outline: "3px solid #2563eb",
+      outlineOffset: "-3px",
+    },
+  },
+  draggable: {
+    cursor: "grab",
+  },
+  dragging: {
+    cursor: "grabbing",
+  },
+  imageControls: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.75rem",
+    marginTop: "1rem",
+    padding: "1rem",
+    backgroundColor: "#f3f4f6",
+    borderRadius: "0.5rem",
+    width: "100%",
+    maxWidth: TEMPLATE_WIDTH,
+  },
+  zoomControl: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.75rem",
+  },
+  zoomSlider: {
+    flex: 1,
+    height: "0.5rem",
+    cursor: "pointer",
+  },
+  zoomValue: {
+    minWidth: "3rem",
+    fontSize: "0.875rem",
+    color: "#374151",
+    textAlign: "right",
+  },
+  resetButton: {
+    padding: "0.5rem 1rem",
+    fontSize: "0.875rem",
+    fontWeight: "600",
+    cursor: "pointer",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#d1d5db",
+    borderRadius: "0.375rem",
+    backgroundColor: "#ffffff",
+    color: "#374151",
+    alignSelf: "flex-start",
+    ":hover": {
+      backgroundColor: "#f9fafb",
+      borderColor: "#9ca3af",
+    },
+    ":focus": {
+      outline: "2px solid #2563eb",
+      outlineOffset: "2px",
+    },
+  },
+  positionHint: {
+    fontSize: "0.75rem",
+    color: "#6b7280",
+    marginTop: "0.75rem",
+    textAlign: "center",
+    maxWidth: TEMPLATE_WIDTH,
   },
   templateOverlay: {
     position: "absolute",
@@ -143,6 +215,7 @@ const styles = stylex.create({
     left: 0,
     width: "100%",
     height: "100%",
+    pointerEvents: "none",
   },
   pdgaNumber: {
     position: "absolute",
@@ -245,6 +318,14 @@ export default function TemplateTest() {
   const [playerImageUrl, setPlayerImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("green");
+  const [imageTransform, setImageTransform] = useState<ImageTransform>(DEFAULT_TRANSFORM);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{
+    x: number;
+    y: number;
+    transformX: number;
+    transformY: number;
+  } | null>(null);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -266,6 +347,73 @@ export default function TemplateTest() {
 
     const url = URL.createObjectURL(file);
     setPlayerImageUrl(url);
+    setImageTransform(DEFAULT_TRANSFORM);
+  };
+
+  const handlePointerDown = (e: PointerEvent<HTMLImageElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      transformX: imageTransform.x,
+      transformY: imageTransform.y,
+    };
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLImageElement>) => {
+    const dragStart = dragStartRef.current;
+    if (!isDragging || !dragStart) return;
+
+    const newX = dragStart.transformX + (e.clientX - dragStart.x);
+    const newY = dragStart.transformY + (e.clientY - dragStart.y);
+
+    setImageTransform((prev) => ({
+      ...prev,
+      x: newX,
+      y: newY,
+    }));
+  };
+
+  const handlePointerUp = (e: PointerEvent<HTMLImageElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
+  const handleZoomChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setImageTransform((prev) => ({
+      ...prev,
+      scale: parseFloat(e.target.value),
+    }));
+  };
+
+  const handleResetTransform = () => {
+    setImageTransform(DEFAULT_TRANSFORM);
+  };
+
+  const handleImageKeyDown = (e: KeyboardEvent<HTMLImageElement>) => {
+    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      return;
+    }
+
+    e.preventDefault();
+    const step = e.shiftKey ? 10 : 1;
+
+    setImageTransform((prev) => {
+      switch (e.key) {
+        case "ArrowUp":
+          return { ...prev, y: prev.y - step };
+        case "ArrowDown":
+          return { ...prev, y: prev.y + step };
+        case "ArrowLeft":
+          return { ...prev, x: prev.x - step };
+        case "ArrowRight":
+          return { ...prev, x: prev.x + step };
+        default:
+          return prev;
+      }
+    });
   };
 
   const { register, watch } = useForm<FormData>({
@@ -424,11 +572,33 @@ export default function TemplateTest() {
         <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
           <span {...stylex.props(styles.srOnly)}>Preview updates as you type</span>
           {playerImageUrl && (
-            <img
-              src={playerImageUrl}
-              alt="Player profile photo"
-              {...stylex.props(styles.playerImage)}
-            />
+            <>
+              <img
+                src={playerImageUrl}
+                alt="Player profile photo"
+                tabIndex={0}
+                draggable={false}
+                aria-describedby="image-position-instructions"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                onKeyDown={handleImageKeyDown}
+                style={{
+                  width: `${String(imageTransform.scale * 100)}%`,
+                  height: `${String(imageTransform.scale * 100)}%`,
+                  transform: `translate(${String(imageTransform.x)}px, ${String(imageTransform.y)}px)`,
+                }}
+                {...stylex.props(
+                  styles.playerImage,
+                  styles.draggable,
+                  isDragging && styles.dragging
+                )}
+              />
+              <span id="image-position-instructions" {...stylex.props(styles.srOnly)}>
+                Use arrow keys to reposition the image. Hold Shift for larger movements.
+              </span>
+            </>
           )}
           <img
             src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
@@ -458,6 +628,42 @@ export default function TemplateTest() {
         >
           Download image
         </button>
+
+        {playerImageUrl && (
+          <>
+            <p {...stylex.props(styles.positionHint)}>
+              Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
+              movements.
+            </p>
+            <div {...stylex.props(styles.imageControls)}>
+              <div {...stylex.props(styles.zoomControl)}>
+                <label htmlFor="zoom-slider" {...stylex.props(styles.label)}>
+                  Zoom
+                </label>
+                <input
+                  id="zoom-slider"
+                  type="range"
+                  min="0.5"
+                  max="3"
+                  step="0.1"
+                  value={imageTransform.scale}
+                  onChange={handleZoomChange}
+                  {...stylex.props(styles.zoomSlider)}
+                />
+                <span {...stylex.props(styles.zoomValue)} aria-live="polite">
+                  {imageTransform.scale.toFixed(1)}x
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetTransform}
+                {...stylex.props(styles.resetButton)}
+              >
+                Reset position
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
