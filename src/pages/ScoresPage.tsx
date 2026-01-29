@@ -269,7 +269,7 @@ const styles = stylex.create({
   },
   templateThumbnail: {
     display: "block",
-    width: 100,
+    width: 120,
     height: "auto",
   },
   templateRadio: {
