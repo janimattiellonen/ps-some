@@ -4,6 +4,7 @@ import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import PageLayout from "../components/common/PageLayout";
 
 type ImageTransform = { x: number; y: number; scale: number };
 
@@ -313,7 +314,7 @@ const styles = stylex.create({
   },
 });
 
-export default function TemplateTest() {
+export default function PlayerPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [playerImageUrl, setPlayerImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
@@ -436,235 +437,241 @@ export default function TemplateTest() {
   };
 
   return (
-    <div {...stylex.props(styles.layout)}>
-      <div {...stylex.props(styles.formColumn)}>
-        <form
-          id="player-profile-form"
-          {...stylex.props(styles.form)}
-          aria-labelledby="form-heading"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void handleDownload();
-          }}
+    <PageLayout>
+      <div {...stylex.props(styles.layout)}>
+        <div {...stylex.props(styles.formColumn)}>
+          <form
+            id="player-profile-form"
+            {...stylex.props(styles.form)}
+            aria-labelledby="form-heading"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleDownload();
+            }}
+          >
+            <h2 id="form-heading" {...stylex.props(styles.heading)}>
+              Player Profile Details
+            </h2>
+
+            <div {...stylex.props(styles.fieldGroup)}>
+              <label htmlFor="playerImage" {...stylex.props(styles.label)}>
+                Player photo
+              </label>
+              <input
+                id="playerImage"
+                type="file"
+                accept=".png,.jpg,.jpeg"
+                onChange={handleImageChange}
+                aria-describedby={imageError ? "playerImage-error" : undefined}
+                {...stylex.props(styles.fileInput)}
+              />
+              {imageError && (
+                <span id="playerImage-error" role="alert" {...stylex.props(styles.error)}>
+                  ⚠️ {imageError}
+                </span>
+              )}
+            </div>
+
+            <div {...stylex.props(styles.fieldGroup)}>
+              <label htmlFor="pdgaNumber" {...stylex.props(styles.label)}>
+                PDGA Number
+              </label>
+              <input
+                id="pdgaNumber"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                {...stylex.props(styles.input)}
+                {...register("pdgaNumber")}
+              />
+            </div>
+
+            <div {...stylex.props(styles.fieldGroup)}>
+              <label htmlFor="name" {...stylex.props(styles.label)}>
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                {...stylex.props(styles.input)}
+                {...register("name")}
+              />
+            </div>
+
+            <div {...stylex.props(styles.fieldGroup)}>
+              <label htmlFor="row2" {...stylex.props(styles.label)}>
+                Secondary text
+              </label>
+              <input
+                id="row2"
+                type="text"
+                autoComplete="off"
+                aria-describedby="row2-hint"
+                {...stylex.props(styles.input)}
+                {...register("row2")}
+              />
+              <span id="row2-hint" {...stylex.props(styles.hint)}>
+                Appears below player name
+              </span>
+            </div>
+
+            <div {...stylex.props(styles.fieldGroup)}>
+              <label htmlFor="row3" {...stylex.props(styles.label)}>
+                Tertiary text
+              </label>
+              <input
+                id="row3"
+                type="text"
+                autoComplete="off"
+                aria-describedby="row3-hint"
+                {...stylex.props(styles.input)}
+                {...register("row3")}
+              />
+              <span id="row3-hint" {...stylex.props(styles.hint)}>
+                Appears at bottom of template
+              </span>
+            </div>
+
+            <fieldset {...stylex.props(styles.templateSelector)}>
+              <legend {...stylex.props(styles.label)}>Choose a template</legend>
+              <div {...stylex.props(styles.templateOptions)} role="radiogroup">
+                {TEMPLATES.map((template) => (
+                  <label
+                    key={template.id}
+                    {...stylex.props(
+                      styles.templateOption,
+                      selectedTemplate === template.id && styles.templateOptionSelected
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="template"
+                      value={template.id}
+                      checked={selectedTemplate === template.id}
+                      onChange={() => {
+                        setSelectedTemplate(template.id);
+                      }}
+                      {...stylex.props(styles.templateRadio)}
+                    />
+                    <img
+                      src={template.src}
+                      alt={template.label}
+                      {...stylex.props(styles.templateThumbnail)}
+                    />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </form>
+        </div>
+
+        <div
+          {...stylex.props(styles.previewColumn)}
+          role="region"
+          aria-labelledby="preview-heading"
         >
-          <h2 id="form-heading" {...stylex.props(styles.heading)}>
-            Player Profile Details
+          <h2 id="preview-heading" {...stylex.props(styles.heading)}>
+            Template Preview
           </h2>
 
-          <div {...stylex.props(styles.fieldGroup)}>
-            <label htmlFor="playerImage" {...stylex.props(styles.label)}>
-              Player photo
-            </label>
-            <input
-              id="playerImage"
-              type="file"
-              accept=".png,.jpg,.jpeg"
-              onChange={handleImageChange}
-              aria-describedby={imageError ? "playerImage-error" : undefined}
-              {...stylex.props(styles.fileInput)}
+          <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
+            <span {...stylex.props(styles.srOnly)}>Preview updates as you type</span>
+            {playerImageUrl && (
+              <>
+                <img
+                  src={playerImageUrl}
+                  alt="Player profile photo"
+                  tabIndex={0}
+                  draggable={false}
+                  aria-describedby="image-position-instructions"
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  onKeyDown={handleImageKeyDown}
+                  style={{
+                    width: `${String(imageTransform.scale * 100)}%`,
+                    height: `${String(imageTransform.scale * 100)}%`,
+                    transform: `translate(${String(imageTransform.x)}px, ${String(imageTransform.y)}px)`,
+                  }}
+                  {...stylex.props(
+                    styles.playerImage,
+                    styles.draggable,
+                    isDragging && styles.dragging
+                  )}
+                />
+                <span id="image-position-instructions" {...stylex.props(styles.srOnly)}>
+                  Use arrow keys to reposition the image. Hold Shift for larger movements.
+                </span>
+              </>
+            )}
+            <img
+              src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
+              alt=""
+              role="presentation"
+              {...stylex.props(styles.templateOverlay)}
             />
-            {imageError && (
-              <span id="playerImage-error" role="alert" {...stylex.props(styles.error)}>
-                ⚠️ {imageError}
-              </span>
+            {formValues.pdgaNumber && (
+              <span {...stylex.props(styles.pdgaNumber)}>{formValues.pdgaNumber}</span>
+            )}
+            {formValues.name && (
+              <span {...stylex.props(styles.textRowBase, styles.textRow1)}>{formValues.name}</span>
+            )}
+            {formValues.row2 && (
+              <span {...stylex.props(styles.textRowBase, styles.textRow2)}>{formValues.row2}</span>
+            )}
+            {formValues.row3 && (
+              <span {...stylex.props(styles.textRowBase, styles.textRow3)}>{formValues.row3}</span>
             )}
           </div>
 
-          <div {...stylex.props(styles.fieldGroup)}>
-            <label htmlFor="pdgaNumber" {...stylex.props(styles.label)}>
-              PDGA Number
-            </label>
-            <input
-              id="pdgaNumber"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              {...stylex.props(styles.input)}
-              {...register("pdgaNumber")}
-            />
-          </div>
+          <button
+            type="submit"
+            form="player-profile-form"
+            {...stylex.props(styles.button)}
+            aria-label="Download player profile image as PNG"
+          >
+            Download image
+          </button>
 
-          <div {...stylex.props(styles.fieldGroup)}>
-            <label htmlFor="name" {...stylex.props(styles.label)}>
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              autoComplete="name"
-              {...stylex.props(styles.input)}
-              {...register("name")}
-            />
-          </div>
-
-          <div {...stylex.props(styles.fieldGroup)}>
-            <label htmlFor="row2" {...stylex.props(styles.label)}>
-              Secondary text
-            </label>
-            <input
-              id="row2"
-              type="text"
-              autoComplete="off"
-              aria-describedby="row2-hint"
-              {...stylex.props(styles.input)}
-              {...register("row2")}
-            />
-            <span id="row2-hint" {...stylex.props(styles.hint)}>
-              Appears below player name
-            </span>
-          </div>
-
-          <div {...stylex.props(styles.fieldGroup)}>
-            <label htmlFor="row3" {...stylex.props(styles.label)}>
-              Tertiary text
-            </label>
-            <input
-              id="row3"
-              type="text"
-              autoComplete="off"
-              aria-describedby="row3-hint"
-              {...stylex.props(styles.input)}
-              {...register("row3")}
-            />
-            <span id="row3-hint" {...stylex.props(styles.hint)}>
-              Appears at bottom of template
-            </span>
-          </div>
-
-          <fieldset {...stylex.props(styles.templateSelector)}>
-            <legend {...stylex.props(styles.label)}>Choose a template</legend>
-            <div {...stylex.props(styles.templateOptions)} role="radiogroup">
-              {TEMPLATES.map((template) => (
-                <label
-                  key={template.id}
-                  {...stylex.props(
-                    styles.templateOption,
-                    selectedTemplate === template.id && styles.templateOptionSelected
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="template"
-                    value={template.id}
-                    checked={selectedTemplate === template.id}
-                    onChange={() => {
-                      setSelectedTemplate(template.id);
-                    }}
-                    {...stylex.props(styles.templateRadio)}
-                  />
-                  <img
-                    src={template.src}
-                    alt={template.label}
-                    {...stylex.props(styles.templateThumbnail)}
-                  />
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        </form>
-      </div>
-
-      <div {...stylex.props(styles.previewColumn)} role="region" aria-labelledby="preview-heading">
-        <h2 id="preview-heading" {...stylex.props(styles.heading)}>
-          Template Preview
-        </h2>
-
-        <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
-          <span {...stylex.props(styles.srOnly)}>Preview updates as you type</span>
           {playerImageUrl && (
             <>
-              <img
-                src={playerImageUrl}
-                alt="Player profile photo"
-                tabIndex={0}
-                draggable={false}
-                aria-describedby="image-position-instructions"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onKeyDown={handleImageKeyDown}
-                style={{
-                  width: `${String(imageTransform.scale * 100)}%`,
-                  height: `${String(imageTransform.scale * 100)}%`,
-                  transform: `translate(${String(imageTransform.x)}px, ${String(imageTransform.y)}px)`,
-                }}
-                {...stylex.props(
-                  styles.playerImage,
-                  styles.draggable,
-                  isDragging && styles.dragging
-                )}
-              />
-              <span id="image-position-instructions" {...stylex.props(styles.srOnly)}>
-                Use arrow keys to reposition the image. Hold Shift for larger movements.
-              </span>
+              <p {...stylex.props(styles.positionHint)}>
+                Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
+                movements.
+              </p>
+              <div {...stylex.props(styles.imageControls)}>
+                <div {...stylex.props(styles.zoomControl)}>
+                  <label htmlFor="zoom-slider" {...stylex.props(styles.label)}>
+                    Zoom
+                  </label>
+                  <input
+                    id="zoom-slider"
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={imageTransform.scale}
+                    onChange={handleZoomChange}
+                    {...stylex.props(styles.zoomSlider)}
+                  />
+                  <span {...stylex.props(styles.zoomValue)} aria-live="polite">
+                    {imageTransform.scale.toFixed(1)}x
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResetTransform}
+                  {...stylex.props(styles.resetButton)}
+                >
+                  Reset position
+                </button>
+              </div>
             </>
           )}
-          <img
-            src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
-            alt=""
-            role="presentation"
-            {...stylex.props(styles.templateOverlay)}
-          />
-          {formValues.pdgaNumber && (
-            <span {...stylex.props(styles.pdgaNumber)}>{formValues.pdgaNumber}</span>
-          )}
-          {formValues.name && (
-            <span {...stylex.props(styles.textRowBase, styles.textRow1)}>{formValues.name}</span>
-          )}
-          {formValues.row2 && (
-            <span {...stylex.props(styles.textRowBase, styles.textRow2)}>{formValues.row2}</span>
-          )}
-          {formValues.row3 && (
-            <span {...stylex.props(styles.textRowBase, styles.textRow3)}>{formValues.row3}</span>
-          )}
         </div>
-
-        <button
-          type="submit"
-          form="player-profile-form"
-          {...stylex.props(styles.button)}
-          aria-label="Download player profile image as PNG"
-        >
-          Download image
-        </button>
-
-        {playerImageUrl && (
-          <>
-            <p {...stylex.props(styles.positionHint)}>
-              Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
-              movements.
-            </p>
-            <div {...stylex.props(styles.imageControls)}>
-              <div {...stylex.props(styles.zoomControl)}>
-                <label htmlFor="zoom-slider" {...stylex.props(styles.label)}>
-                  Zoom
-                </label>
-                <input
-                  id="zoom-slider"
-                  type="range"
-                  min="0.5"
-                  max="3"
-                  step="0.1"
-                  value={imageTransform.scale}
-                  onChange={handleZoomChange}
-                  {...stylex.props(styles.zoomSlider)}
-                />
-                <span {...stylex.props(styles.zoomValue)} aria-live="polite">
-                  {imageTransform.scale.toFixed(1)}x
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleResetTransform}
-                {...stylex.props(styles.resetButton)}
-              >
-                Reset position
-              </button>
-            </div>
-          </>
-        )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
