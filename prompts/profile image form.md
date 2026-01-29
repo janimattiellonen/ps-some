@@ -35,6 +35,6 @@ Currently a hard-coded image is used. Allow the user to upload a selected photo 
 
 ## Selecting profile template
 
-Currently the image player-profile-green.png is used as the profile template. The directory contains the image player-profile-pink.png, which is nother profile template with pink colors.
+Currently the image player-profile-green.png is used as the profile template. The directory contains the image player-profile-pink.png, which is another profile template with pink colors.
 
 In the attached image you can see how I visualize the template selection to look like
