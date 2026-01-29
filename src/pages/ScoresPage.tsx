@@ -22,6 +22,14 @@ type TemplateId = (typeof TEMPLATES)[number]["id"];
 
 const CLUB_LOGO_SRC = "/images/ps-logo.png";
 
+const SCORE_ROWS = [
+  { num: 1, rowKey: "row1", memberKey: "row1Member", style: "scoreRow1" },
+  { num: 2, rowKey: "row2", memberKey: "row2Member", style: "scoreRow2" },
+  { num: 3, rowKey: "row3", memberKey: "row3Member", style: "scoreRow3" },
+  { num: 4, rowKey: "row4", memberKey: "row4Member", style: "scoreRow4" },
+  { num: 5, rowKey: "row5", memberKey: "row5Member", style: "scoreRow5" },
+] as const;
+
 const schema = z.object({
   competitionName: z.string().optional(),
   row1: z.string().optional(),
@@ -346,125 +354,31 @@ export default function ScoresPage() {
               />
             </div>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row1" {...stylex.props(styles.label)}>
-                Row 1
-              </label>
-              <div {...stylex.props(styles.inputRow)}>
-                <input
-                  id="row1"
-                  type="text"
-                  autoComplete="off"
-                  {...stylex.props(styles.input, styles.inputFlex)}
-                  {...register("row1")}
-                />
-                <label htmlFor="row1Member" {...stylex.props(styles.checkboxLabel)}>
-                  <input
-                    id="row1Member"
-                    type="checkbox"
-                    {...stylex.props(styles.checkbox)}
-                    {...register("row1Member")}
-                  />
-                  Member
+            {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
+              <div key={num} {...stylex.props(styles.fieldGroup)}>
+                <label htmlFor={rowKey} {...stylex.props(styles.label)}>
+                  Row {num}
                 </label>
-              </div>
-            </div>
-
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row2" {...stylex.props(styles.label)}>
-                Row 2
-              </label>
-              <div {...stylex.props(styles.inputRow)}>
-                <input
-                  id="row2"
-                  type="text"
-                  autoComplete="off"
-                  {...stylex.props(styles.input, styles.inputFlex)}
-                  {...register("row2")}
-                />
-                <label htmlFor="row2Member" {...stylex.props(styles.checkboxLabel)}>
+                <div {...stylex.props(styles.inputRow)}>
                   <input
-                    id="row2Member"
-                    type="checkbox"
-                    {...stylex.props(styles.checkbox)}
-                    {...register("row2Member")}
+                    id={rowKey}
+                    type="text"
+                    autoComplete="off"
+                    {...stylex.props(styles.input, styles.inputFlex)}
+                    {...register(rowKey)}
                   />
-                  Member
-                </label>
+                  <label htmlFor={memberKey} {...stylex.props(styles.checkboxLabel)}>
+                    <input
+                      id={memberKey}
+                      type="checkbox"
+                      {...stylex.props(styles.checkbox)}
+                      {...register(memberKey)}
+                    />
+                    Member
+                  </label>
+                </div>
               </div>
-            </div>
-
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row3" {...stylex.props(styles.label)}>
-                Row 3
-              </label>
-              <div {...stylex.props(styles.inputRow)}>
-                <input
-                  id="row3"
-                  type="text"
-                  autoComplete="off"
-                  {...stylex.props(styles.input, styles.inputFlex)}
-                  {...register("row3")}
-                />
-                <label htmlFor="row3Member" {...stylex.props(styles.checkboxLabel)}>
-                  <input
-                    id="row3Member"
-                    type="checkbox"
-                    {...stylex.props(styles.checkbox)}
-                    {...register("row3Member")}
-                  />
-                  Member
-                </label>
-              </div>
-            </div>
-
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row4" {...stylex.props(styles.label)}>
-                Row 4
-              </label>
-              <div {...stylex.props(styles.inputRow)}>
-                <input
-                  id="row4"
-                  type="text"
-                  autoComplete="off"
-                  {...stylex.props(styles.input, styles.inputFlex)}
-                  {...register("row4")}
-                />
-                <label htmlFor="row4Member" {...stylex.props(styles.checkboxLabel)}>
-                  <input
-                    id="row4Member"
-                    type="checkbox"
-                    {...stylex.props(styles.checkbox)}
-                    {...register("row4Member")}
-                  />
-                  Member
-                </label>
-              </div>
-            </div>
-
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row5" {...stylex.props(styles.label)}>
-                Row 5
-              </label>
-              <div {...stylex.props(styles.inputRow)}>
-                <input
-                  id="row5"
-                  type="text"
-                  autoComplete="off"
-                  {...stylex.props(styles.input, styles.inputFlex)}
-                  {...register("row5")}
-                />
-                <label htmlFor="row5Member" {...stylex.props(styles.checkboxLabel)}>
-                  <input
-                    id="row5Member"
-                    type="checkbox"
-                    {...stylex.props(styles.checkbox)}
-                    {...register("row5Member")}
-                  />
-                  Member
-                </label>
-              </div>
-            </div>
+            ))}
 
             <fieldset {...stylex.props(styles.templateSelector)}>
               <legend {...stylex.props(styles.label)}>Choose a template</legend>
@@ -534,76 +448,27 @@ export default function ScoresPage() {
             {formValues.competitionName && (
               <span {...stylex.props(styles.resultsLabel)}>Tulokset</span>
             )}
-            {formValues.row1 && (
-              <span {...stylex.props(styles.scoreRowBase, styles.scoreRow1)}>
-                {formValues.row1Member && (
-                  <img
-                    src={CLUB_LOGO_SRC}
-                    alt=""
-                    {...stylex.props(
-                      formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
-                    )}
-                  />
-                )}
-                {formValues.row1}
-              </span>
-            )}
-            {formValues.row2 && (
-              <span {...stylex.props(styles.scoreRowBase, styles.scoreRow2)}>
-                {formValues.row2Member && (
-                  <img
-                    src={CLUB_LOGO_SRC}
-                    alt=""
-                    {...stylex.props(
-                      formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
-                    )}
-                  />
-                )}
-                {formValues.row2}
-              </span>
-            )}
-            {formValues.row3 && (
-              <span {...stylex.props(styles.scoreRowBase, styles.scoreRow3)}>
-                {formValues.row3Member && (
-                  <img
-                    src={CLUB_LOGO_SRC}
-                    alt=""
-                    {...stylex.props(
-                      formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
-                    )}
-                  />
-                )}
-                {formValues.row3}
-              </span>
-            )}
-            {formValues.row4 && (
-              <span {...stylex.props(styles.scoreRowBase, styles.scoreRow4)}>
-                {formValues.row4Member && (
-                  <img
-                    src={CLUB_LOGO_SRC}
-                    alt=""
-                    {...stylex.props(
-                      formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
-                    )}
-                  />
-                )}
-                {formValues.row4}
-              </span>
-            )}
-            {formValues.row5 && (
-              <span {...stylex.props(styles.scoreRowBase, styles.scoreRow5)}>
-                {formValues.row5Member && (
-                  <img
-                    src={CLUB_LOGO_SRC}
-                    alt=""
-                    {...stylex.props(
-                      formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
-                    )}
-                  />
-                )}
-                {formValues.row5}
-              </span>
-            )}
+            {SCORE_ROWS.map(({ num, rowKey, memberKey, style }) => {
+              const rowText = formValues[rowKey];
+              const isMember = formValues[memberKey];
+
+              if (!rowText) return null;
+
+              return (
+                <span key={num} {...stylex.props(styles.scoreRowBase, styles[style])}>
+                  {isMember && (
+                    <img
+                      src={CLUB_LOGO_SRC}
+                      alt=""
+                      {...stylex.props(
+                        formValues.logoBackground ? styles.clubLogoWithBackground : styles.clubLogo
+                      )}
+                    />
+                  )}
+                  {rowText}
+                </span>
+              );
+            })}
           </div>
 
           <button
