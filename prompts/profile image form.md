@@ -30,7 +30,7 @@ All four editable fields are optional and can be left empty. No rules for the fi
 
 ## Uploading an image
 
-Currently a hard-coded image is used. Allow the user to upload a selected photo (png, jpg or jpeg). Set maximum image size to 20Mb. If the user tries to upload an image larger than 20Mb, show an error message below the uoload field in red color. Add a red triangle emoji to make the error message more clear
+Currently a hard-coded image is used. Allow the user to upload a selected photo (png, jpg or jpeg). Set maximum image size to 20Mb. If the user tries to upload an image larger than 20Mb, show an error message below the upload field in red color. Add a red triangle emoji to make the error message more clear
 
 
 ## Selecting profile template
