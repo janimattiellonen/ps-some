@@ -126,12 +126,12 @@ export default function Dashboard() {
             role="button"
             tabIndex={0}
             onClick={() => {
-              navigate(feature.route);
+              void navigate(feature.route);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                navigate(feature.route);
+                void navigate(feature.route);
               }
             }}
             {...stylex.props(styles.card)}
