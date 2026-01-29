@@ -5,6 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
+import {
+  layoutStyles,
+  formStyles,
+  typographyStyles,
+  templateSelectorStyles,
+  utilityStyles,
+} from "../styles/shared";
 
 const TEMPLATE_WIDTH = 419;
 const TEMPLATE_HEIGHT = 518;
@@ -48,97 +55,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const styles = stylex.create({
-  layout: {
-    display: "flex",
-    flexDirection: {
-      default: "column",
-      "@media (min-width: 900px)": "row",
-    },
-    gap: "2rem",
-    alignItems: {
-      default: "stretch",
-      "@media (min-width: 900px)": "flex-start",
-    },
-  },
-  formColumn: {
-    flex: {
-      default: "none",
-      "@media (min-width: 900px)": "0 0 350px",
-    },
-  },
-  previewColumn: {
-    flex: {
-      default: "none",
-      "@media (min-width: 900px)": "1 1 auto",
-    },
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  heading: {
-    fontSize: "1.25rem",
-    fontWeight: "bold",
-    marginBottom: "0.5rem",
-    color: "#111827",
-  },
-  fieldGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.25rem",
-  },
-  label: {
-    fontSize: "0.875rem",
-    fontWeight: "600",
-    color: "#374151",
-  },
-  hint: {
-    fontSize: "0.75rem",
-    color: "#6b7280",
-    marginTop: "0.25rem",
-  },
-  input: {
-    padding: "0.5rem 0.75rem",
-    fontSize: "1rem",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#d1d5db",
-    borderRadius: "0.375rem",
-    backgroundColor: "#ffffff",
-    color: "#111827",
-    outline: "none",
-    ":focus": {
-      borderColor: "#2563eb",
-      boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.1)",
-    },
-  },
   container: {
     position: "relative",
     width: TEMPLATE_WIDTH,
     height: TEMPLATE_HEIGHT,
     overflow: "hidden",
-  },
-  button: {
-    marginTop: "1rem",
-    padding: "0.75rem 1.5rem",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    cursor: "pointer",
-    borderWidth: 0,
-    borderRadius: "0.5rem",
-    backgroundColor: "#2563eb",
-    color: "white",
-    ":focus": {
-      outline: "3px solid #1e40af",
-      outlineOffset: "2px",
-    },
-    ":hover": {
-      backgroundColor: "#1d4ed8",
-    },
   },
   templateImage: {
     position: "absolute",
@@ -237,60 +158,6 @@ const styles = stylex.create({
   scoreRow5: {
     top: `${String(((SCORE_ROWS_TOP + SCORE_ROW_SPACING * 4) / TEMPLATE_HEIGHT) * 100)}%`,
   },
-  srOnly: {
-    position: "absolute",
-    width: "1px",
-    height: "1px",
-    padding: 0,
-    margin: "-1px",
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
-    whiteSpace: "nowrap",
-    borderWidth: 0,
-  },
-  templateSelector: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-  },
-  templateOptions: {
-    display: "flex",
-    flexDirection: "row",
-    gap: "1rem",
-  },
-  templateOption: {
-    position: "relative",
-    cursor: "pointer",
-    borderWidth: "3px",
-    borderStyle: "solid",
-    borderColor: "transparent",
-    borderRadius: "0.5rem",
-    overflow: "hidden",
-    transition: "border-color 0.15s ease",
-    ":focus-within": {
-      outline: "3px solid #2563eb",
-      outlineOffset: "2px",
-    },
-  },
-  templateOptionSelected: {
-    borderColor: "#2563eb",
-  },
-  templateThumbnail: {
-    display: "block",
-    width: 120,
-    height: "auto",
-  },
-  templateRadio: {
-    position: "absolute",
-    width: "1px",
-    height: "1px",
-    padding: 0,
-    margin: "-1px",
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
-    whiteSpace: "nowrap",
-    borderWidth: 0,
-  },
 });
 
 export default function ScoresPage() {
@@ -326,37 +193,37 @@ export default function ScoresPage() {
 
   return (
     <PageLayout>
-      <div {...stylex.props(styles.layout)}>
-        <div {...stylex.props(styles.formColumn)}>
+      <div {...stylex.props(layoutStyles.layout)}>
+        <div {...stylex.props(layoutStyles.formColumn)}>
           <form
             id="scores-form"
-            {...stylex.props(styles.form)}
+            {...stylex.props(formStyles.form)}
             aria-labelledby="form-heading"
             onSubmit={(e) => {
               e.preventDefault();
               void handleDownload();
             }}
           >
-            <h2 id="form-heading" {...stylex.props(styles.heading)}>
+            <h2 id="form-heading" {...stylex.props(typographyStyles.heading)}>
               Competition Scores
             </h2>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="competitionName" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="competitionName" {...stylex.props(formStyles.label)}>
                 Competition name
               </label>
               <input
                 id="competitionName"
                 type="text"
                 autoComplete="off"
-                {...stylex.props(styles.input)}
+                {...stylex.props(formStyles.input)}
                 {...register("competitionName")}
               />
             </div>
 
             {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
-              <div key={num} {...stylex.props(styles.fieldGroup)}>
-                <label htmlFor={rowKey} {...stylex.props(styles.label)}>
+              <div key={num} {...stylex.props(formStyles.fieldGroup)}>
+                <label htmlFor={rowKey} {...stylex.props(formStyles.label)}>
                   Row {num}
                 </label>
                 <div {...stylex.props(styles.inputRow)}>
@@ -364,7 +231,7 @@ export default function ScoresPage() {
                     id={rowKey}
                     type="text"
                     autoComplete="off"
-                    {...stylex.props(styles.input, styles.inputFlex)}
+                    {...stylex.props(formStyles.input, styles.inputFlex)}
                     {...register(rowKey)}
                   />
                   <label htmlFor={memberKey} {...stylex.props(styles.checkboxLabel)}>
@@ -380,15 +247,16 @@ export default function ScoresPage() {
               </div>
             ))}
 
-            <fieldset {...stylex.props(styles.templateSelector)}>
-              <legend {...stylex.props(styles.label)}>Choose a template</legend>
-              <div {...stylex.props(styles.templateOptions)} role="radiogroup">
+            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
+              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
+              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
                 {TEMPLATES.map((template) => (
                   <label
                     key={template.id}
                     {...stylex.props(
-                      styles.templateOption,
-                      selectedTemplate === template.id && styles.templateOptionSelected
+                      templateSelectorStyles.templateOption,
+                      selectedTemplate === template.id &&
+                        templateSelectorStyles.templateOptionSelected
                     )}
                   >
                     <input
@@ -399,19 +267,19 @@ export default function ScoresPage() {
                       onChange={() => {
                         setSelectedTemplate(template.id);
                       }}
-                      {...stylex.props(styles.templateRadio)}
+                      {...stylex.props(templateSelectorStyles.templateRadio)}
                     />
                     <img
                       src={template.src}
                       alt={template.label}
-                      {...stylex.props(styles.templateThumbnail)}
+                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
                     />
                   </label>
                 ))}
               </div>
             </fieldset>
 
-            <div {...stylex.props(styles.fieldGroup)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
               <label htmlFor="logoBackground" {...stylex.props(styles.checkboxLabel)}>
                 <input
                   id="logoBackground"
@@ -426,16 +294,16 @@ export default function ScoresPage() {
         </div>
 
         <div
-          {...stylex.props(styles.previewColumn)}
+          {...stylex.props(layoutStyles.previewColumn)}
           role="region"
           aria-labelledby="preview-heading"
         >
-          <h2 id="preview-heading" {...stylex.props(styles.heading)}>
+          <h2 id="preview-heading" {...stylex.props(typographyStyles.heading)}>
             Preview
           </h2>
 
           <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
-            <span {...stylex.props(styles.srOnly)}>Preview updates as you type</span>
+            <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
             <img
               src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
               alt=""
@@ -474,7 +342,7 @@ export default function ScoresPage() {
           <button
             type="submit"
             form="scores-form"
-            {...stylex.props(styles.button)}
+            {...stylex.props(formStyles.button)}
             aria-label="Download competition scores image as PNG"
           >
             Download image

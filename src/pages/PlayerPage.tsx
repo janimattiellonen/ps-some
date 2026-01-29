@@ -5,6 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
+import {
+  layoutStyles,
+  formStyles,
+  typographyStyles,
+  templateSelectorStyles,
+  utilityStyles,
+} from "../styles/shared";
 
 type ImageTransform = { x: number; y: number; scale: number };
 
@@ -33,58 +40,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const styles = stylex.create({
-  layout: {
-    display: "flex",
-    flexDirection: {
-      default: "column",
-      "@media (min-width: 900px)": "row",
-    },
-    gap: "2rem",
-    alignItems: {
-      default: "stretch",
-      "@media (min-width: 900px)": "flex-start",
-    },
-  },
-  formColumn: {
-    flex: {
-      default: "none",
-      "@media (min-width: 900px)": "0 0 350px",
-    },
-  },
-  previewColumn: {
-    flex: {
-      default: "none",
-      "@media (min-width: 900px)": "1 1 auto",
-    },
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  heading: {
-    fontSize: "1.25rem",
-    fontWeight: "bold",
-    marginBottom: "0.5rem",
-    color: "#111827",
-  },
-  fieldGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.25rem",
-  },
-  label: {
-    fontSize: "0.875rem",
-    fontWeight: "600",
-    color: "#374151",
-  },
-  hint: {
-    fontSize: "0.75rem",
-    color: "#6b7280",
-    marginTop: "0.25rem",
+  container: {
+    position: "relative",
+    width: TEMPLATE_WIDTH,
+    height: TEMPLATE_HEIGHT,
+    overflow: "hidden",
   },
   error: {
     fontSize: "0.875rem",
@@ -94,45 +54,6 @@ const styles = stylex.create({
   fileInput: {
     fontSize: "0.875rem",
     color: "#374151",
-  },
-  input: {
-    padding: "0.5rem 0.75rem",
-    fontSize: "1rem",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#d1d5db",
-    borderRadius: "0.375rem",
-    backgroundColor: "#ffffff",
-    color: "#111827",
-    outline: "none",
-    ":focus": {
-      borderColor: "#2563eb",
-      boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.1)",
-    },
-  },
-  container: {
-    position: "relative",
-    width: TEMPLATE_WIDTH,
-    height: TEMPLATE_HEIGHT,
-    overflow: "hidden",
-  },
-  button: {
-    marginTop: "1rem",
-    padding: "0.75rem 1.5rem",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    cursor: "pointer",
-    borderWidth: 0,
-    borderRadius: "0.5rem",
-    backgroundColor: "#2563eb",
-    color: "white",
-    ":focus": {
-      outline: "3px solid #1e40af",
-      outlineOffset: "2px",
-    },
-    ":hover": {
-      backgroundColor: "#1d4ed8",
-    },
   },
   playerImage: {
     position: "absolute",
@@ -257,60 +178,6 @@ const styles = stylex.create({
     top: `${String((535 / TEMPLATE_HEIGHT) * 100)}%`,
     fontSize: "clamp(0.875rem, 4vw, 1.25rem)",
     fontWeight: "bold",
-  },
-  srOnly: {
-    position: "absolute",
-    width: "1px",
-    height: "1px",
-    padding: 0,
-    margin: "-1px",
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
-    whiteSpace: "nowrap",
-    borderWidth: 0,
-  },
-  templateSelector: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.5rem",
-  },
-  templateOptions: {
-    display: "flex",
-    flexDirection: "row",
-    gap: "1rem",
-  },
-  templateOption: {
-    position: "relative",
-    cursor: "pointer",
-    borderWidth: "3px",
-    borderStyle: "solid",
-    borderColor: "transparent",
-    borderRadius: "0.5rem",
-    overflow: "hidden",
-    transition: "border-color 0.15s ease",
-    ":focus-within": {
-      outline: "3px solid #2563eb",
-      outlineOffset: "2px",
-    },
-  },
-  templateOptionSelected: {
-    borderColor: "#2563eb",
-  },
-  templateThumbnail: {
-    display: "block",
-    width: 120,
-    height: "auto",
-  },
-  templateRadio: {
-    position: "absolute",
-    width: "1px",
-    height: "1px",
-    padding: 0,
-    margin: "-1px",
-    overflow: "hidden",
-    clip: "rect(0, 0, 0, 0)",
-    whiteSpace: "nowrap",
-    borderWidth: 0,
   },
 });
 
@@ -438,23 +305,23 @@ export default function PlayerPage() {
 
   return (
     <PageLayout>
-      <div {...stylex.props(styles.layout)}>
-        <div {...stylex.props(styles.formColumn)}>
+      <div {...stylex.props(layoutStyles.layout)}>
+        <div {...stylex.props(layoutStyles.formColumn)}>
           <form
             id="player-profile-form"
-            {...stylex.props(styles.form)}
+            {...stylex.props(formStyles.form)}
             aria-labelledby="form-heading"
             onSubmit={(e) => {
               e.preventDefault();
               void handleDownload();
             }}
           >
-            <h2 id="form-heading" {...stylex.props(styles.heading)}>
+            <h2 id="form-heading" {...stylex.props(typographyStyles.heading)}>
               Player Profile Details
             </h2>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="playerImage" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="playerImage" {...stylex.props(formStyles.label)}>
                 Player photo
               </label>
               <input
@@ -472,8 +339,8 @@ export default function PlayerPage() {
               )}
             </div>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="pdgaNumber" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="pdgaNumber" {...stylex.props(formStyles.label)}>
                 PDGA Number
               </label>
               <input
@@ -481,26 +348,26 @@ export default function PlayerPage() {
                 type="text"
                 inputMode="numeric"
                 autoComplete="off"
-                {...stylex.props(styles.input)}
+                {...stylex.props(formStyles.input)}
                 {...register("pdgaNumber")}
               />
             </div>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="name" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="name" {...stylex.props(formStyles.label)}>
                 Name
               </label>
               <input
                 id="name"
                 type="text"
                 autoComplete="name"
-                {...stylex.props(styles.input)}
+                {...stylex.props(formStyles.input)}
                 {...register("name")}
               />
             </div>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row2" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row2" {...stylex.props(formStyles.label)}>
                 Secondary text
               </label>
               <input
@@ -508,16 +375,16 @@ export default function PlayerPage() {
                 type="text"
                 autoComplete="off"
                 aria-describedby="row2-hint"
-                {...stylex.props(styles.input)}
+                {...stylex.props(formStyles.input)}
                 {...register("row2")}
               />
-              <span id="row2-hint" {...stylex.props(styles.hint)}>
+              <span id="row2-hint" {...stylex.props(formStyles.hint)}>
                 Appears below player name
               </span>
             </div>
 
-            <div {...stylex.props(styles.fieldGroup)}>
-              <label htmlFor="row3" {...stylex.props(styles.label)}>
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row3" {...stylex.props(formStyles.label)}>
                 Tertiary text
               </label>
               <input
@@ -525,23 +392,24 @@ export default function PlayerPage() {
                 type="text"
                 autoComplete="off"
                 aria-describedby="row3-hint"
-                {...stylex.props(styles.input)}
+                {...stylex.props(formStyles.input)}
                 {...register("row3")}
               />
-              <span id="row3-hint" {...stylex.props(styles.hint)}>
+              <span id="row3-hint" {...stylex.props(formStyles.hint)}>
                 Appears at bottom of template
               </span>
             </div>
 
-            <fieldset {...stylex.props(styles.templateSelector)}>
-              <legend {...stylex.props(styles.label)}>Choose a template</legend>
-              <div {...stylex.props(styles.templateOptions)} role="radiogroup">
+            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
+              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
+              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
                 {TEMPLATES.map((template) => (
                   <label
                     key={template.id}
                     {...stylex.props(
-                      styles.templateOption,
-                      selectedTemplate === template.id && styles.templateOptionSelected
+                      templateSelectorStyles.templateOption,
+                      selectedTemplate === template.id &&
+                        templateSelectorStyles.templateOptionSelected
                     )}
                   >
                     <input
@@ -552,12 +420,12 @@ export default function PlayerPage() {
                       onChange={() => {
                         setSelectedTemplate(template.id);
                       }}
-                      {...stylex.props(styles.templateRadio)}
+                      {...stylex.props(templateSelectorStyles.templateRadio)}
                     />
                     <img
                       src={template.src}
                       alt={template.label}
-                      {...stylex.props(styles.templateThumbnail)}
+                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
                     />
                   </label>
                 ))}
@@ -567,16 +435,16 @@ export default function PlayerPage() {
         </div>
 
         <div
-          {...stylex.props(styles.previewColumn)}
+          {...stylex.props(layoutStyles.previewColumn)}
           role="region"
           aria-labelledby="preview-heading"
         >
-          <h2 id="preview-heading" {...stylex.props(styles.heading)}>
+          <h2 id="preview-heading" {...stylex.props(typographyStyles.heading)}>
             Template Preview
           </h2>
 
           <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
-            <span {...stylex.props(styles.srOnly)}>Preview updates as you type</span>
+            <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
             {playerImageUrl && (
               <>
                 <img
@@ -601,7 +469,7 @@ export default function PlayerPage() {
                     isDragging && styles.dragging
                   )}
                 />
-                <span id="image-position-instructions" {...stylex.props(styles.srOnly)}>
+                <span id="image-position-instructions" {...stylex.props(utilityStyles.srOnly)}>
                   Use arrow keys to reposition the image. Hold Shift for larger movements.
                 </span>
               </>
@@ -629,7 +497,7 @@ export default function PlayerPage() {
           <button
             type="submit"
             form="player-profile-form"
-            {...stylex.props(styles.button)}
+            {...stylex.props(formStyles.button)}
             aria-label="Download player profile image as PNG"
           >
             Download image
@@ -643,7 +511,7 @@ export default function PlayerPage() {
               </p>
               <div {...stylex.props(styles.imageControls)}>
                 <div {...stylex.props(styles.zoomControl)}>
-                  <label htmlFor="zoom-slider" {...stylex.props(styles.label)}>
+                  <label htmlFor="zoom-slider" {...stylex.props(formStyles.label)}>
                     Zoom
                   </label>
                   <input
