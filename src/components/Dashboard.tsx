@@ -22,6 +22,13 @@ const FEATURES = [
       { src: "/images/templates/scores-green.png", label: "Green" },
     ],
   },
+  {
+    id: "event",
+    title: "Event Poster",
+    description: "Create event announcement posters",
+    route: "/event",
+    templates: [{ src: "/images/templates/oittaa.png", label: "Forest" }],
+  },
 ] as const;
 
 const styles = stylex.create({
