@@ -1,11 +1,27 @@
 import { useRef } from "react";
 import * as stylex from "@stylexjs/stylex";
 import { snapdom } from "@zumer/snapdom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
-import { layoutStyles, formStyles, typographyStyles } from "../styles/shared";
+import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
+
+const CLUB_LOGO_SRC = "/images/ps-logo-white.png";
+
+const schema = z.object({
+  title: z.string().optional(),
+  subtitle: z.string().optional(),
+  row1: z.string().optional(),
+  row2: z.string().optional(),
+  row3: z.string().optional(),
+  row4: z.string().optional(),
+});
+
+type FormData = z.infer<typeof schema>;
 
 const styles = stylex.create({
   container: {
@@ -52,7 +68,7 @@ const styles = stylex.create({
   },
   decorativeLine2: {
     position: "absolute",
-    top: 765,
+    top: 900,
     right: "-2%",
     width: "18%",
     height: "4px",
@@ -76,28 +92,28 @@ const styles = stylex.create({
     position: "absolute",
     top: 45,
     left: 0,
-    width: "100%",
+    right: 0,
     height: 55,
     backgroundColor: "yellow",
-    clipPath: "polygon(0% 0%, 0% 27.27%, 105% 100%)",
+    clipPath: "polygon(0% 0%, 0% 27.27%, 100% 100%)",
   },
   topAccent: {
     position: "absolute",
     top: 60,
     left: 0,
-    width: "100%",
+    right: 0,
     height: 41,
     backgroundColor: "red",
-    clipPath: "polygon(0% 0%, 0% 37.5%, 105% 97.5%)",
+    clipPath: "polygon(0% 0%, 0% 37.5%, 100% 97.5%)",
   },
   trapezoid: {
     position: "absolute",
     top: 75,
-    left: "0",
-    width: "100%",
-    height: 480,
+    left: 0,
+    right: 0,
+    height: 475,
     backgroundColor: "rgba(27, 154, 213, 0.85)",
-    clipPath: "polygon(0% 0%, 105% 5%, 105% 98%, 0% 100%)",
+    clipPath: "polygon(0% 0%, 100% 4%, 100% 98%, 0% 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -105,22 +121,25 @@ const styles = stylex.create({
   },
   bottomAccent: {
     position: "absolute",
-    top: 510,
+    top: 505,
     left: 0,
-    width: "100%",
+    right: 0,
     height: 110,
     backgroundColor: "green",
-    // Left: (0, 620), Top-right: (105%, 510), Bottom-right: (105%, 530)
-    // Bottom-right is 15px higher than trapezoid's bottom-right (545.4px)
-    clipPath: "polygon(0% 98%, 105% 56%, 105% 74%)",
+    clipPath: "polygon(0% 98%, 100% 56%, 100% 74%)",
   },
   contentWrapper: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "1.5rem",
+    gap: "1rem",
     textAlign: "center",
     width: "100%",
+  },
+  clubLogo: {
+    height: "clamp(3rem, 8vw, 5rem)",
+    width: "auto",
+    marginBottom: "0.5rem",
   },
   title: {
     color: "white",
@@ -160,6 +179,20 @@ const styles = stylex.create({
 export default function EventPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const { register, watch } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: "",
+      subtitle: "",
+      row1: "",
+      row2: "",
+      row3: "",
+      row4: "",
+    },
+  });
+
+  const formValues = watch();
+
   const handleDownload = async () => {
     if (!containerRef.current) return;
 
@@ -171,15 +204,97 @@ export default function EventPage() {
     <PageLayout>
       <div {...stylex.props(layoutStyles.layout)}>
         <div {...stylex.props(layoutStyles.formColumn)}>
-          <div {...stylex.props(formStyles.form)} aria-labelledby="form-heading">
+          <form
+            id="event-form"
+            {...stylex.props(formStyles.form)}
+            aria-labelledby="form-heading"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleDownload();
+            }}
+          >
             <h2 id="form-heading" {...stylex.props(typographyStyles.heading)}>
               Event Details
             </h2>
-            <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-              This is a prototype with hardcoded content. Form inputs will be added in a later
-              phase.
-            </p>
-          </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="title" {...stylex.props(formStyles.label)}>
+                Title
+              </label>
+              <input
+                id="title"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("title")}
+              />
+            </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="subtitle" {...stylex.props(formStyles.label)}>
+                Subtitle
+              </label>
+              <input
+                id="subtitle"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("subtitle")}
+              />
+            </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row1" {...stylex.props(formStyles.label)}>
+                Row 1
+              </label>
+              <input
+                id="row1"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("row1")}
+              />
+            </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row2" {...stylex.props(formStyles.label)}>
+                Row 2
+              </label>
+              <input
+                id="row2"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("row2")}
+              />
+            </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row3" {...stylex.props(formStyles.label)}>
+                Row 3
+              </label>
+              <input
+                id="row3"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("row3")}
+              />
+            </div>
+
+            <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="row4" {...stylex.props(formStyles.label)}>
+                Row 4
+              </label>
+              <input
+                id="row4"
+                type="text"
+                autoComplete="off"
+                {...stylex.props(formStyles.input)}
+                {...register("row4")}
+              />
+            </div>
+          </form>
         </div>
 
         <div
@@ -192,7 +307,8 @@ export default function EventPage() {
           </h2>
 
           <div {...stylex.props(styles.previewWrapper)}>
-            <div ref={containerRef} {...stylex.props(styles.container)}>
+            <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
+              <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
               {/* Layer 1: Background image */}
               <img
                 src="/images/templates/oittaa.png"
@@ -217,12 +333,18 @@ export default function EventPage() {
               {/* Layer 5: Trapezoid shape with content */}
               <div {...stylex.props(styles.trapezoid)}>
                 <div {...stylex.props(styles.contentWrapper)}>
-                  <h1 {...stylex.props(styles.title)}>KESÄ TOUR 2026</h1>
-                  <p {...stylex.props(styles.subtitle)}>15.6.2026</p>
-                  <div {...stylex.props(styles.divider)} />
-                  <p {...stylex.props(styles.infoRow)}>Oittaan frisbeegolfrata</p>
-                  <p {...stylex.props(styles.infoRow)}>Klo 10:00</p>
-                  <p {...stylex.props(styles.infoRow)}>Ilmoittaudu viimeistään 10.6.</p>
+                  <img src={CLUB_LOGO_SRC} alt="Club logo" {...stylex.props(styles.clubLogo)} />
+                  {formValues.title && <h1 {...stylex.props(styles.title)}>{formValues.title}</h1>}
+                  {formValues.subtitle && (
+                    <p {...stylex.props(styles.subtitle)}>{formValues.subtitle}</p>
+                  )}
+                  {(formValues.row1 || formValues.row2 || formValues.row3 || formValues.row4) && (
+                    <div {...stylex.props(styles.divider)} />
+                  )}
+                  {formValues.row1 && <p {...stylex.props(styles.infoRow)}>{formValues.row1}</p>}
+                  {formValues.row2 && <p {...stylex.props(styles.infoRow)}>{formValues.row2}</p>}
+                  {formValues.row3 && <p {...stylex.props(styles.infoRow)}>{formValues.row3}</p>}
+                  {formValues.row4 && <p {...stylex.props(styles.infoRow)}>{formValues.row4}</p>}
                 </div>
               </div>
 
@@ -235,10 +357,8 @@ export default function EventPage() {
           </div>
 
           <button
-            type="button"
-            onClick={() => {
-              void handleDownload();
-            }}
+            type="submit"
+            form="event-form"
             {...stylex.props(formStyles.button)}
             aria-label="Download event poster as PNG"
           >

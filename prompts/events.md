@@ -18,8 +18,24 @@ The above mentioned geometry shape should be recreatable using code. We can then
 
 
 
-# Shape changes
+## Shape changes
 
 In file /Users/janimattiellonen/Documents/Development/Frisbeegolf/puskis-some/src/pages/EventPage.tsx
 
 the geometry shape starts currently way to down. Previously I said it should begin at the height of 300px but I was wrong. It should start at the height of about 75px
+
+## Form
+
+In file /Users/janimattiellonen/Documents/Development/Frisbeegolf/puskis-some/src/pages/EventPage.tsx
+
+Next, it's time to make the contents editable.
+
+Fields:
+- title
+- subtitle
+- 4 rows
+
+All fields are optional. Place club logo (public/images/ps-logo-white.png) on top of all fields.
+
+Use similar concept as with the other forms (PlayerPage and ScoresPage)
+
