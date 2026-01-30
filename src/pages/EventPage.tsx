@@ -103,6 +103,17 @@ const styles = stylex.create({
     justifyContent: "center",
     padding: "2rem",
   },
+  bottomAccent: {
+    position: "absolute",
+    top: 510,
+    left: 0,
+    width: "100%",
+    height: 110,
+    backgroundColor: "green",
+    // Left: (0, 620), Top-right: (105%, 510), Bottom-right: (105%, 530)
+    // Bottom-right is 15px higher than trapezoid's bottom-right (545.4px)
+    clipPath: "polygon(0% 98%, 105% 56%, 105% 74%)",
+  },
   contentWrapper: {
     display: "flex",
     flexDirection: "column",
@@ -215,7 +226,10 @@ export default function EventPage() {
                 </div>
               </div>
 
-              {/* Layer 6: Inset border frame */}
+              {/* Layer 6: Bottom accent shape */}
+              <div {...stylex.props(styles.bottomAccent)} />
+
+              {/* Layer 7: Inset border frame */}
               <div {...stylex.props(styles.imageBorder)} />
             </div>
           </div>
