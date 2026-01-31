@@ -12,6 +12,7 @@ import {
   templateSelectorStyles,
   utilityStyles,
 } from "../styles/shared";
+import { TEMPLATE_COLORS } from "../styles/colors";
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
@@ -30,13 +31,13 @@ const TEMPLATES_STANDARD = [
     id: "blue",
     src: "/images/templates/event-blue.png",
     label: "Blue template",
-    color: "rgba(27, 154, 213, 0.85)",
+    color: TEMPLATE_COLORS.blue.standard,
   },
   {
     id: "pink",
     src: "/images/templates/event-pink.png",
     label: "Pink template",
-    color: "rgba(238, 86, 160, 0.85)",
+    color: TEMPLATE_COLORS.pink.standard,
   },
 ] as const;
 
@@ -45,15 +46,15 @@ const TEMPLATES_OVERLAY = [
     id: "blue",
     src: "/images/templates/event-overlay-blue.png",
     label: "Blue template",
-    color: "rgba(27, 154, 213, 0.85)",
-    overlayColor: "rgba(27, 154, 213, 0.8)",
+    color: TEMPLATE_COLORS.blue.standard,
+    overlayColor: TEMPLATE_COLORS.blue.overlay,
   },
   {
     id: "pink",
     src: "/images/templates/event-overlay-pink.png",
     label: "Pink template",
-    color: "rgba(238, 86, 160, 0.85)",
-    overlayColor: "rgba(238, 86, 160, 0.8)",
+    color: TEMPLATE_COLORS.pink.standard,
+    overlayColor: TEMPLATE_COLORS.pink.overlay,
   },
 ] as const;
 
