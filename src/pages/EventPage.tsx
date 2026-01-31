@@ -1,18 +1,15 @@
 import { useRef, useState } from "react";
 import * as stylex from "@stylexjs/stylex";
-import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
-import {
-  layoutStyles,
-  formStyles,
-  typographyStyles,
-  templateSelectorStyles,
-  utilityStyles,
-} from "../styles/shared";
+import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
+import { TemplateSelector } from "../components/form/TemplateSelector";
+import { TextField } from "../components/form/TextField";
+import { CheckboxField } from "../components/form/CheckboxField";
 import { TEMPLATE_COLORS } from "../styles/colors";
+import { downloadAsImage } from "../utils/imageDownload";
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
@@ -288,19 +285,6 @@ const styles = stylex.create({
       borderColor: "#1d4ed8",
     },
   },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    fontSize: "0.875rem",
-    color: "#374151",
-    cursor: "pointer",
-  },
-  checkbox: {
-    width: "1.25rem",
-    height: "1.25rem",
-    cursor: "pointer",
-  },
 });
 
 export default function EventPage() {
@@ -333,10 +317,7 @@ export default function EventPage() {
       : undefined;
 
   const handleDownload = async () => {
-    if (!containerRef.current) return;
-
-    const snap = await snapdom(containerRef.current, { scale: 2 });
-    await snap.download({ filename: "event-poster.png", type: "png" });
+    await downloadAsImage(containerRef.current, "event-poster.png");
   };
 
   return (
@@ -378,160 +359,31 @@ export default function EventPage() {
             </div>
 
             {/* Template selector */}
-            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
-              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
-              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
-                {currentTemplates.map((template) => (
-                  <label
-                    key={template.id}
-                    {...stylex.props(
-                      templateSelectorStyles.templateOption,
-                      selectedTemplate === template.id &&
-                        templateSelectorStyles.templateOptionSelected
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="template"
-                      value={template.id}
-                      checked={selectedTemplate === template.id}
-                      onChange={() => {
-                        setSelectedTemplate(template.id);
-                      }}
-                      {...stylex.props(templateSelectorStyles.templateRadio)}
-                    />
-                    <img
-                      src={template.src}
-                      alt={template.label}
-                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <TemplateSelector
+              templates={currentTemplates}
+              selectedId={selectedTemplate}
+              onSelect={setSelectedTemplate}
+            />
 
             {/* Standard version fields */}
             {selectedVersion === "standard" && (
               <>
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="title" {...stylex.props(formStyles.label)}>
-                    Title
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("title")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="subtitle" {...stylex.props(formStyles.label)}>
-                    Subtitle
-                  </label>
-                  <input
-                    id="subtitle"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("subtitle")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="row1" {...stylex.props(formStyles.label)}>
-                    Row 1
-                  </label>
-                  <input
-                    id="row1"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("row1")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="row2" {...stylex.props(formStyles.label)}>
-                    Row 2
-                  </label>
-                  <input
-                    id="row2"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("row2")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="row3" {...stylex.props(formStyles.label)}>
-                    Row 3
-                  </label>
-                  <input
-                    id="row3"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("row3")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="row4" {...stylex.props(formStyles.label)}>
-                    Row 4
-                  </label>
-                  <input
-                    id="row4"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("row4")}
-                  />
-                </div>
+                <TextField id="title" label="Title" register={register} />
+                <TextField id="subtitle" label="Subtitle" register={register} />
+                <TextField id="row1" label="Row 1" register={register} />
+                <TextField id="row2" label="Row 2" register={register} />
+                <TextField id="row3" label="Row 3" register={register} />
+                <TextField id="row4" label="Row 4" register={register} />
               </>
             )}
 
             {/* Overlay version fields */}
             {selectedVersion === "overlay" && (
               <>
+                <TextField id="overlayRow1" label="Text row 1" register={register} />
+                <TextField id="overlayRow2" label="Text row 2" register={register} />
                 <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="overlayRow1" {...stylex.props(formStyles.label)}>
-                    Text row 1
-                  </label>
-                  <input
-                    id="overlayRow1"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("overlayRow1")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="overlayRow2" {...stylex.props(formStyles.label)}>
-                    Text row 2
-                  </label>
-                  <input
-                    id="overlayRow2"
-                    type="text"
-                    autoComplete="off"
-                    {...stylex.props(formStyles.input)}
-                    {...register("overlayRow2")}
-                  />
-                </div>
-
-                <div {...stylex.props(formStyles.fieldGroup)}>
-                  <label htmlFor="showOverlay" {...stylex.props(styles.checkboxLabel)}>
-                    <input
-                      id="showOverlay"
-                      type="checkbox"
-                      {...stylex.props(styles.checkbox)}
-                      {...register("showOverlay")}
-                    />
-                    Show overlay
-                  </label>
+                  <CheckboxField id="showOverlay" label="Show overlay" register={register} />
                 </div>
               </>
             )}
