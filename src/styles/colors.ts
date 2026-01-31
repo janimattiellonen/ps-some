@@ -39,3 +39,34 @@ export const TEMPLATE_COLORS = {
     overlay: rgba(THEME_COLORS.pink.r, THEME_COLORS.pink.g, THEME_COLORS.pink.b, 0.8),
   },
 } as const;
+
+/**
+ * UI colors used for form elements, buttons, and general UI components.
+ */
+export const UI_COLORS = {
+  // Primary palette
+  primary: "#2563eb",
+  primaryHover: "#1d4ed8",
+  primaryFocus: "#1e40af",
+
+  // Neutral palette
+  gray50: "#f9fafb",
+  gray100: "#f3f4f6",
+  gray300: "#d1d5db",
+  gray400: "#9ca3af",
+  gray500: "#6b7280",
+  gray700: "#374151",
+  gray900: "#111827",
+
+  // Semantic colors
+  error: "#dc2626",
+
+  // Custom colors
+  darkBlue: "#1e3a5f",
+  overlayDark: "rgba(9, 50, 81, 0.8)",
+  contentBackdrop: "rgba(0, 0, 0, 0.5)",
+
+  // Base colors
+  white: "#ffffff",
+  black: "#000000",
+} as const;

@@ -1,17 +1,14 @@
 import { useRef, useState } from "react";
 import * as stylex from "@stylexjs/stylex";
-import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
-import {
-  layoutStyles,
-  formStyles,
-  typographyStyles,
-  templateSelectorStyles,
-  utilityStyles,
-} from "../styles/shared";
+import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
+import { TemplateSelector } from "../components/form/TemplateSelector";
+import { TextField } from "../components/form/TextField";
+import { CheckboxField } from "../components/form/CheckboxField";
+import { downloadAsImage } from "../utils/imageDownload";
 
 const TEMPLATE_WIDTH = 419;
 const TEMPLATE_HEIGHT = 518;
@@ -129,20 +126,6 @@ const styles = stylex.create({
   inputFlex: {
     flex: 1,
   },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.25rem",
-    fontSize: "0.75rem",
-    color: "#6b7280",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  },
-  checkbox: {
-    width: "1rem",
-    height: "1rem",
-    cursor: "pointer",
-  },
   scoreRow1: {
     top: `${String((SCORE_ROWS_TOP / TEMPLATE_HEIGHT) * 100)}%`,
   },
@@ -185,10 +168,7 @@ export default function ScoresPage() {
   const formValues = watch();
 
   const handleDownload = async () => {
-    if (!containerRef.current) return;
-
-    const snap = await snapdom(containerRef.current, { scale: 2 });
-    await snap.download({ filename: "competition-scores.png", type: "png" });
+    await downloadAsImage(containerRef.current, "competition-scores.png");
   };
 
   return (
@@ -208,18 +188,7 @@ export default function ScoresPage() {
               Competition Scores
             </h2>
 
-            <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="competitionName" {...stylex.props(formStyles.label)}>
-                Competition name
-              </label>
-              <input
-                id="competitionName"
-                type="text"
-                autoComplete="off"
-                {...stylex.props(formStyles.input)}
-                {...register("competitionName")}
-              />
-            </div>
+            <TextField id="competitionName" label="Competition name" register={register} />
 
             {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
               <div key={num} {...stylex.props(formStyles.fieldGroup)}>
@@ -234,61 +203,28 @@ export default function ScoresPage() {
                     {...stylex.props(formStyles.input, styles.inputFlex)}
                     {...register(rowKey)}
                   />
-                  <label htmlFor={memberKey} {...stylex.props(styles.checkboxLabel)}>
-                    <input
-                      id={memberKey}
-                      type="checkbox"
-                      {...stylex.props(styles.checkbox)}
-                      {...register(memberKey)}
-                    />
-                    Member
-                  </label>
+                  <CheckboxField
+                    id={memberKey}
+                    label="Member"
+                    register={register}
+                    variant="compact"
+                  />
                 </div>
               </div>
             ))}
 
-            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
-              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
-              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
-                {TEMPLATES.map((template) => (
-                  <label
-                    key={template.id}
-                    {...stylex.props(
-                      templateSelectorStyles.templateOption,
-                      selectedTemplate === template.id &&
-                        templateSelectorStyles.templateOptionSelected
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="template"
-                      value={template.id}
-                      checked={selectedTemplate === template.id}
-                      onChange={() => {
-                        setSelectedTemplate(template.id);
-                      }}
-                      {...stylex.props(templateSelectorStyles.templateRadio)}
-                    />
-                    <img
-                      src={template.src}
-                      alt={template.label}
-                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <TemplateSelector
+              templates={TEMPLATES}
+              selectedId={selectedTemplate}
+              onSelect={setSelectedTemplate}
+            />
 
             <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="logoBackground" {...stylex.props(styles.checkboxLabel)}>
-                <input
-                  id="logoBackground"
-                  type="checkbox"
-                  {...stylex.props(styles.checkbox)}
-                  {...register("logoBackground")}
-                />
-                Add background to club logo
-              </label>
+              <CheckboxField
+                id="logoBackground"
+                label="Add background to club logo"
+                register={register}
+              />
             </div>
           </form>
         </div>

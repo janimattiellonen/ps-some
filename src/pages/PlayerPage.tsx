@@ -1,17 +1,14 @@
 import { useRef, useState, type ChangeEvent, type PointerEvent, type KeyboardEvent } from "react";
 import * as stylex from "@stylexjs/stylex";
-import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
-import {
-  layoutStyles,
-  formStyles,
-  typographyStyles,
-  templateSelectorStyles,
-  utilityStyles,
-} from "../styles/shared";
+import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
+import { TemplateSelector } from "../components/form/TemplateSelector";
+import { TextField } from "../components/form/TextField";
+import { downloadAsImage } from "../utils/imageDownload";
+import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
 
 type ImageTransform = { x: number; y: number; scale: number };
 
@@ -19,9 +16,6 @@ const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
 
 const TEMPLATE_WIDTH = 551;
 const TEMPLATE_HEIGHT = 690;
-const MAX_FILE_SIZE_MB = 20;
-const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg"];
 
 const TEMPLATES = [
   { id: "green", src: "/images/templates/player-profile-green.png", label: "Green template" },
@@ -201,14 +195,9 @@ export default function PlayerPage() {
 
     if (!file) return;
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setImageError("Please upload a PNG or JPEG image.");
-      e.target.value = "";
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setImageError(`Image must be smaller than ${String(MAX_FILE_SIZE_MB)}MB.`);
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setImageError(validationError.message);
       e.target.value = "";
       return;
     }
@@ -297,10 +286,7 @@ export default function PlayerPage() {
   const formValues = watch();
 
   const handleDownload = async () => {
-    if (!containerRef.current) return;
-
-    const snap = await snapdom(containerRef.current, { scale: 2 });
-    await snap.download({ filename: "player-profile.png", type: "png" });
+    await downloadAsImage(containerRef.current, "player-profile.png");
   };
 
   return (
@@ -327,7 +313,7 @@ export default function PlayerPage() {
               <input
                 id="playerImage"
                 type="file"
-                accept=".png,.jpg,.jpeg"
+                accept={IMAGE_VALIDATION.ACCEPTED_EXTENSIONS}
                 onChange={handleImageChange}
                 aria-describedby={imageError ? "playerImage-error" : undefined}
                 {...stylex.props(styles.fileInput)}
@@ -339,98 +325,34 @@ export default function PlayerPage() {
               )}
             </div>
 
-            <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="pdgaNumber" {...stylex.props(formStyles.label)}>
-                PDGA Number
-              </label>
-              <input
-                id="pdgaNumber"
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                {...stylex.props(formStyles.input)}
-                {...register("pdgaNumber")}
-              />
-            </div>
+            <TextField
+              id="pdgaNumber"
+              label="PDGA Number"
+              register={register}
+              inputMode="numeric"
+            />
 
-            <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="name" {...stylex.props(formStyles.label)}>
-                Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                {...stylex.props(formStyles.input)}
-                {...register("name")}
-              />
-            </div>
+            <TextField id="name" label="Name" register={register} autoComplete="name" />
 
-            <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="row2" {...stylex.props(formStyles.label)}>
-                Secondary text
-              </label>
-              <input
-                id="row2"
-                type="text"
-                autoComplete="off"
-                aria-describedby="row2-hint"
-                {...stylex.props(formStyles.input)}
-                {...register("row2")}
-              />
-              <span id="row2-hint" {...stylex.props(formStyles.hint)}>
-                Appears below player name
-              </span>
-            </div>
+            <TextField
+              id="row2"
+              label="Secondary text"
+              register={register}
+              hint="Appears below player name"
+            />
 
-            <div {...stylex.props(formStyles.fieldGroup)}>
-              <label htmlFor="row3" {...stylex.props(formStyles.label)}>
-                Tertiary text
-              </label>
-              <input
-                id="row3"
-                type="text"
-                autoComplete="off"
-                aria-describedby="row3-hint"
-                {...stylex.props(formStyles.input)}
-                {...register("row3")}
-              />
-              <span id="row3-hint" {...stylex.props(formStyles.hint)}>
-                Appears at bottom of template
-              </span>
-            </div>
+            <TextField
+              id="row3"
+              label="Tertiary text"
+              register={register}
+              hint="Appears at bottom of template"
+            />
 
-            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
-              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
-              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
-                {TEMPLATES.map((template) => (
-                  <label
-                    key={template.id}
-                    {...stylex.props(
-                      templateSelectorStyles.templateOption,
-                      selectedTemplate === template.id &&
-                        templateSelectorStyles.templateOptionSelected
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="template"
-                      value={template.id}
-                      checked={selectedTemplate === template.id}
-                      onChange={() => {
-                        setSelectedTemplate(template.id);
-                      }}
-                      {...stylex.props(templateSelectorStyles.templateRadio)}
-                    />
-                    <img
-                      src={template.src}
-                      alt={template.label}
-                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <TemplateSelector
+              templates={TEMPLATES}
+              selectedId={selectedTemplate}
+              onSelect={setSelectedTemplate}
+            />
           </form>
         </div>
 
