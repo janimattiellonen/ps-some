@@ -56,8 +56,6 @@ A web app for generating social media images for disc golf events.
 
 # Design
 
-- for titles, use Heading component (app/components/typography/Heading)
-- for paragraphs, use Text component (app/components/typography/Text)
 - after implementing a new feature or fixing an issue:
   - run `npm run lint` and fix problems. Changes should never be committed and pushed to github if
     the linter returns warnings or errors (IGNORE THIS FOR NOW, NOT INSTALLED)

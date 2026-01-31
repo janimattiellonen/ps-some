@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import PlayerPage from "./pages/PlayerPage";
 import ScoresPage from "./pages/ScoresPage";
+import EventPage from "./pages/EventPage";
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/player" element={<PlayerPage />} />
         <Route path="/scores" element={<ScoresPage />} />
+        <Route path="/event" element={<EventPage />} />
       </Routes>
     </BrowserRouter>
   );
