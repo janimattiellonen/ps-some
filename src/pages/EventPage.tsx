@@ -1,16 +1,39 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import * as stylex from "@stylexjs/stylex";
 import { snapdom } from "@zumer/snapdom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import PageLayout from "../components/common/PageLayout";
-import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
+import {
+  layoutStyles,
+  formStyles,
+  typographyStyles,
+  templateSelectorStyles,
+  utilityStyles,
+} from "../styles/shared";
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
 
 const CLUB_LOGO_SRC = "/images/ps-logo-white.png";
+
+const TEMPLATES = [
+  {
+    id: "blue",
+    src: "/images/templates/event-blue.png",
+    label: "Blue template",
+    color: "rgba(27, 154, 213, 0.85)",
+  },
+  {
+    id: "pink",
+    src: "/images/templates/event-pink.png",
+    label: "Pink template",
+    color: "rgba(238, 86, 160, 0.85)",
+  },
+] as const;
+
+type TemplateId = (typeof TEMPLATES)[number]["id"];
 
 const schema = z.object({
   title: z.string().optional(),
@@ -112,7 +135,6 @@ const styles = stylex.create({
     left: 0,
     right: 0,
     height: 475,
-    backgroundColor: "rgba(27, 154, 213, 0.85)",
     clipPath: "polygon(0% 0%, 100% 4%, 100% 98%, 0% 100%)",
     display: "flex",
     alignItems: "center",
@@ -178,6 +200,7 @@ const styles = stylex.create({
 
 export default function EventPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
 
   const { register, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -294,6 +317,38 @@ export default function EventPage() {
                 {...register("row4")}
               />
             </div>
+
+            <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
+              <legend {...stylex.props(formStyles.label)}>Choose a template</legend>
+              <div {...stylex.props(templateSelectorStyles.templateOptions)} role="radiogroup">
+                {TEMPLATES.map((template) => (
+                  <label
+                    key={template.id}
+                    {...stylex.props(
+                      templateSelectorStyles.templateOption,
+                      selectedTemplate === template.id &&
+                        templateSelectorStyles.templateOptionSelected
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="template"
+                      value={template.id}
+                      checked={selectedTemplate === template.id}
+                      onChange={() => {
+                        setSelectedTemplate(template.id);
+                      }}
+                      {...stylex.props(templateSelectorStyles.templateRadio)}
+                    />
+                    <img
+                      src={template.src}
+                      alt={template.label}
+                      {...stylex.props(templateSelectorStyles.templateThumbnail)}
+                    />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </form>
         </div>
 
@@ -331,7 +386,12 @@ export default function EventPage() {
               <div {...stylex.props(styles.topAccent)} />
 
               {/* Layer 5: Trapezoid shape with content */}
-              <div {...stylex.props(styles.trapezoid)}>
+              <div
+                {...stylex.props(styles.trapezoid)}
+                style={{
+                  backgroundColor: TEMPLATES.find((t) => t.id === selectedTemplate)?.color,
+                }}
+              >
                 <div {...stylex.props(styles.contentWrapper)}>
                   <img src={CLUB_LOGO_SRC} alt="Club logo" {...stylex.props(styles.clubLogo)} />
                   {formValues.title && <h1 {...stylex.props(styles.title)}>{formValues.title}</h1>}
