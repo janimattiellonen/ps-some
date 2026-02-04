@@ -10,6 +10,7 @@ const FEATURES = [
     templates: [
       { src: "/images/templates/player-profile-green.png", label: "Green" },
       { src: "/images/templates/player-profile-pink.png", label: "Pink" },
+      { src: "/images/templates/player-profile-blue.png", label: "Blue" },
     ],
   },
   {
