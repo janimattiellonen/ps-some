@@ -7,6 +7,7 @@ import PageLayout from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
+import { CheckboxField } from "../components/form/CheckboxField";
 import { downloadAsImage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
 
@@ -18,14 +19,31 @@ const TEMPLATE_WIDTH = 551;
 const TEMPLATE_HEIGHT = 690;
 
 const TEMPLATES = [
-  { id: "green", src: "/images/templates/player-profile-green.png", label: "Green template" },
-  { id: "pink", src: "/images/templates/player-profile-pink.png", label: "Pink template" },
+  {
+    id: "green",
+    src: "/images/templates/player-profile-green.png",
+    srcNoPdga: "/images/templates/player-profile-green-no-pdga.png",
+    label: "Green template",
+  },
+  {
+    id: "pink",
+    src: "/images/templates/player-profile-pink.png",
+    srcNoPdga: "/images/templates/player-profile-pink-no-pdga.png",
+    label: "Pink template",
+  },
+  {
+    id: "blue",
+    src: "/images/templates/player-profile-blue.png",
+    srcNoPdga: "/images/templates/player-profile-blue-no-pdga.png",
+    label: "Blue template",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
 const schema = z.object({
   pdgaNumber: z.string().optional(),
+  hidePdga: z.boolean().optional(),
   name: z.string().optional(),
   row2: z.string().optional(),
   row3: z.string().optional(),
@@ -39,6 +57,18 @@ const styles = stylex.create({
     width: TEMPLATE_WIDTH,
     height: TEMPLATE_HEIGHT,
     overflow: "hidden",
+    borderRadius: "0.5rem",
+  },
+  borderOverlay: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
+    boxShadow: "inset 0 0 0 3px #6b7280",
+    borderRadius: "0.5rem",
+    pointerEvents: "none",
+    zIndex: 10,
   },
   error: {
     fontSize: "0.875rem",
@@ -173,6 +203,26 @@ const styles = stylex.create({
     fontSize: "clamp(0.875rem, 4vw, 1.25rem)",
     fontWeight: "bold",
   },
+  pdgaRow: {
+    display: "flex",
+    gap: "1rem",
+    alignItems: "flex-end",
+  },
+  pdgaFieldWrapper: {
+    flex: 1,
+  },
+  hideCheckboxWrapper: {
+    paddingBottom: "0.5rem",
+  },
+  clubLogo: {
+    position: "absolute",
+    bottom: `${String((40 / TEMPLATE_HEIGHT) * 100)}%`,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "auto",
+    height: 90,
+    pointerEvents: "none",
+  },
 });
 
 export default function PlayerPage() {
@@ -277,6 +327,7 @@ export default function PlayerPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       pdgaNumber: "",
+      hidePdga: false,
       name: "",
       row2: "",
       row3: "",
@@ -325,12 +376,20 @@ export default function PlayerPage() {
               )}
             </div>
 
-            <TextField
-              id="pdgaNumber"
-              label="PDGA Number"
-              register={register}
-              inputMode="numeric"
-            />
+            <div {...stylex.props(styles.pdgaRow)}>
+              <div {...stylex.props(styles.pdgaFieldWrapper)}>
+                <TextField
+                  id="pdgaNumber"
+                  label="PDGA Number"
+                  register={register}
+                  inputMode="numeric"
+                  disabled={formValues.hidePdga}
+                />
+              </div>
+              <div {...stylex.props(styles.hideCheckboxWrapper)}>
+                <CheckboxField id="hidePdga" label="Hide" register={register} variant="compact" />
+              </div>
+            </div>
 
             <TextField id="name" label="Name" register={register} autoComplete="name" />
 
@@ -352,6 +411,7 @@ export default function PlayerPage() {
               templates={TEMPLATES}
               selectedId={selectedTemplate}
               onSelect={setSelectedTemplate}
+              srcKey={formValues.hidePdga ? "srcNoPdga" : "src"}
             />
           </form>
         </div>
@@ -397,12 +457,16 @@ export default function PlayerPage() {
               </>
             )}
             <img
-              src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
+              src={
+                formValues.hidePdga
+                  ? TEMPLATES.find((t) => t.id === selectedTemplate)?.srcNoPdga
+                  : TEMPLATES.find((t) => t.id === selectedTemplate)?.src
+              }
               alt=""
               role="presentation"
               {...stylex.props(styles.templateOverlay)}
             />
-            {formValues.pdgaNumber && (
+            {formValues.pdgaNumber && !formValues.hidePdga && (
               <span {...stylex.props(styles.pdgaNumber)}>{formValues.pdgaNumber}</span>
             )}
             {formValues.name && (
@@ -414,6 +478,13 @@ export default function PlayerPage() {
             {formValues.row3 && (
               <span {...stylex.props(styles.textRowBase, styles.textRow3)}>{formValues.row3}</span>
             )}
+            <img
+              src="/images/ps-logo-white.png"
+              alt=""
+              role="presentation"
+              {...stylex.props(styles.clubLogo)}
+            />
+            <div {...stylex.props(styles.borderOverlay)} aria-hidden="true" />
           </div>
 
           <button

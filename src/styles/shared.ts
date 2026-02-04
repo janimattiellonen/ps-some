@@ -66,6 +66,11 @@ export const formStyles = stylex.create({
       boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.1)",
     },
   },
+  inputDisabled: {
+    backgroundColor: "#f3f4f6",
+    color: "#6b7280",
+    cursor: "not-allowed",
+  },
   button: {
     marginTop: "1rem",
     padding: "0.75rem 1.5rem",

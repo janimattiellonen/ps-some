@@ -7,6 +7,7 @@ type TemplateSelectorProps<T extends readonly BaseTemplate[]> = {
   selectedId: T[number]["id"];
   onSelect: (id: T[number]["id"]) => void;
   name?: string;
+  srcKey?: "src" | "srcNoPdga";
 };
 
 export function TemplateSelector<T extends readonly BaseTemplate[]>({
@@ -14,6 +15,7 @@ export function TemplateSelector<T extends readonly BaseTemplate[]>({
   selectedId,
   onSelect,
   name = "template",
+  srcKey = "src",
 }: TemplateSelectorProps<T>) {
   return (
     <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
@@ -38,7 +40,7 @@ export function TemplateSelector<T extends readonly BaseTemplate[]>({
               {...stylex.props(templateSelectorStyles.templateRadio)}
             />
             <img
-              src={template.src}
+              src={(srcKey === "srcNoPdga" && template.srcNoPdga) || template.src}
               alt={template.label}
               {...stylex.props(templateSelectorStyles.templateThumbnail)}
             />
