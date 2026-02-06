@@ -23,6 +23,20 @@ const TEMPLATES = [
     src: "/images/templates/scores-blue.png",
     doodlesSrc: "/images/templates/doodles-white.png",
     label: "Blue template",
+    gradientFrom: "#063949",
+    gradientTo: "#105c7a",
+    innerRectangleColor: "#1d9ad5",
+    innerBorderColor: "#105c7a",
+  },
+  {
+    id: "green",
+    src: "/images/templates/scores-green.png",
+    doodlesSrc: "/images/templates/doodles-white.png",
+    label: "Green template",
+    gradientFrom: "#093702",
+    gradientTo: "#206b22",
+    innerRectangleColor: "#3db749",
+    innerBorderColor: "#206b22",
   },
 ] as const;
 
@@ -61,7 +75,6 @@ const styles = stylex.create({
     width: TEMPLATE_WIDTH,
     height: TEMPLATE_HEIGHT,
     overflow: "hidden",
-    backgroundImage: "linear-gradient(to bottom, #063949, #105c7a)",
     borderRadius: "0.5rem",
   },
   borderOverlay: {
@@ -81,7 +94,6 @@ const styles = stylex.create({
     left: 55,
     right: 55,
     bottom: 55,
-    backgroundColor: "#1d9ad5",
   },
   innerBorder: {
     position: "absolute",
@@ -89,7 +101,6 @@ const styles = stylex.create({
     left: 60,
     right: 60,
     bottom: 60,
-    boxShadow: "inset 0 0 0 3px #105c7a",
     pointerEvents: "none",
   },
   hornImage: {
@@ -283,7 +294,14 @@ export default function ScoresPage2() {
             Preview
           </h2>
 
-          <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
+          <div
+            ref={containerRef}
+            {...stylex.props(styles.container)}
+            style={{
+              backgroundImage: `linear-gradient(to bottom, ${TEMPLATES.find((t) => t.id === selectedTemplate)?.gradientFrom}, ${TEMPLATES.find((t) => t.id === selectedTemplate)?.gradientTo})`,
+            }}
+            aria-live="polite"
+          >
             <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
             <img
               src={TEMPLATES.find((t) => t.id === selectedTemplate)?.doodlesSrc}
@@ -318,8 +336,21 @@ export default function ScoresPage2() {
                 </span>
               );
             })}
-            <div {...stylex.props(styles.innerRectangle)} aria-hidden="true" />
-            <div {...stylex.props(styles.innerBorder)} aria-hidden="true" />
+            <div
+              {...stylex.props(styles.innerRectangle)}
+              style={{
+                backgroundColor: TEMPLATES.find((t) => t.id === selectedTemplate)
+                  ?.innerRectangleColor,
+              }}
+              aria-hidden="true"
+            />
+            <div
+              {...stylex.props(styles.innerBorder)}
+              style={{
+                boxShadow: `inset 0 0 0 3px ${TEMPLATES.find((t) => t.id === selectedTemplate)?.innerBorderColor}`,
+              }}
+              aria-hidden="true"
+            />
             <img
               src="/images/templates/horn-white.png"
               alt=""
