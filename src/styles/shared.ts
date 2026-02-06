@@ -109,7 +109,9 @@ export const templateSelectorStyles = stylex.create({
   templateOptions: {
     display: "flex",
     flexDirection: "row",
-    gap: "1rem",
+    flexWrap: "wrap",
+    gap: "0.5rem",
+    maxWidth: 280,
   },
   templateOption: {
     position: "relative",
@@ -130,7 +132,7 @@ export const templateSelectorStyles = stylex.create({
   },
   templateThumbnail: {
     display: "block",
-    width: 120,
+    width: 80,
     height: "auto",
   },
   templateRadio: {

@@ -37,6 +37,18 @@ const TEMPLATES = [
     srcNoPdga: "/images/templates/player-profile-blue-no-pdga.png",
     label: "Blue template",
   },
+  {
+    id: "golden",
+    src: "/images/templates/player-profile-golden.png",
+    srcNoPdga: "/images/templates/player-profile-golden-no-pdga.png",
+    label: "Golden template",
+  },
+  {
+    id: "gray",
+    src: "/images/templates/player-profile-gray.png",
+    srcNoPdga: "/images/templates/player-profile-gray-no-pdga.png",
+    label: "Gray template",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -223,6 +235,31 @@ const styles = stylex.create({
     height: 90,
     pointerEvents: "none",
   },
+  buttonGroup: {
+    display: "flex",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  secondaryButton: {
+    padding: "0.75rem 1.5rem",
+    fontSize: "1rem",
+    fontWeight: "bold",
+    cursor: "pointer",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#d1d5db",
+    borderRadius: "0.5rem",
+    backgroundColor: "#ffffff",
+    color: "#374151",
+    ":focus": {
+      outline: "3px solid #2563eb",
+      outlineOffset: "2px",
+    },
+    ":hover": {
+      backgroundColor: "#f9fafb",
+      borderColor: "#9ca3af",
+    },
+  },
 });
 
 export default function PlayerPage() {
@@ -338,6 +375,20 @@ export default function PlayerPage() {
 
   const handleDownload = async () => {
     await downloadAsImage(containerRef.current, "player-profile.png");
+  };
+
+  const handleDownloadAllVersions = async () => {
+    const originalTemplate = selectedTemplate;
+    const suffix = formValues.hidePdga ? "-no-pdga" : "";
+
+    for (const template of TEMPLATES) {
+      setSelectedTemplate(template.id);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await downloadAsImage(containerRef.current, `player-profile-${template.id}${suffix}.png`);
+    }
+
+    // Restore original template
+    setSelectedTemplate(originalTemplate);
   };
 
   return (
@@ -487,14 +538,24 @@ export default function PlayerPage() {
             <div {...stylex.props(styles.borderOverlay)} aria-hidden="true" />
           </div>
 
-          <button
-            type="submit"
-            form="player-profile-form"
-            {...stylex.props(formStyles.button)}
-            aria-label="Download player profile image as PNG"
-          >
-            Download image
-          </button>
+          <div {...stylex.props(styles.buttonGroup)}>
+            <button
+              type="submit"
+              form="player-profile-form"
+              {...stylex.props(formStyles.button)}
+              aria-label="Download player profile image as PNG"
+            >
+              Download image
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadAllVersions()}
+              {...stylex.props(styles.secondaryButton)}
+              aria-label="Download both PDGA and no-PDGA versions"
+            >
+              Download all versions
+            </button>
+          </div>
 
           {playerImageUrl && (
             <>

@@ -11,6 +11,8 @@ const FEATURES = [
       { src: "/images/templates/player-profile-green.png", label: "Green" },
       { src: "/images/templates/player-profile-pink.png", label: "Pink" },
       { src: "/images/templates/player-profile-blue.png", label: "Blue" },
+      { src: "/images/templates/player-profile-golden.png", label: "Golden" },
+      { src: "/images/templates/player-profile-gray.png", label: "Gray" },
     ],
   },
   {
@@ -18,6 +20,16 @@ const FEATURES = [
     title: "Competition Scores",
     description: "Share competition results and leaderboards",
     route: "/scores",
+    templates: [
+      { src: "/images/templates/scores-blue.png", label: "Blue" },
+      { src: "/images/templates/scores-green.png", label: "Green" },
+    ],
+  },
+  {
+    id: "scores2",
+    title: "Competition Scores 2",
+    description: "Share competition results and leaderboards",
+    route: "/scores2",
     templates: [
       { src: "/images/templates/scores-blue.png", label: "Blue" },
       { src: "/images/templates/scores-green.png", label: "Green" },
@@ -95,8 +107,12 @@ const styles = stylex.create({
   },
   templatesContainer: {
     display: "flex",
-    gap: "1rem",
+    flexWrap: "wrap",
+    gap: "0.5rem",
     justifyContent: "center",
+    maxWidth: 280,
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   templatePreview: {
     display: "flex",
@@ -105,9 +121,9 @@ const styles = stylex.create({
     gap: "0.5rem",
   },
   templateImage: {
-    width: 120,
+    width: 80,
     height: "auto",
-    borderRadius: "0.5rem",
+    borderRadius: "0.375rem",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
   templateLabel: {
