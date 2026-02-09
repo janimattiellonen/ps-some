@@ -33,7 +33,7 @@ export function validateImageFile(file: File): FileValidationError | null {
   if (file.size > IMAGE_VALIDATION.MAX_FILE_SIZE_BYTES) {
     return {
       type: "file-too-large",
-      message: `Image must be smaller than ${IMAGE_VALIDATION.MAX_FILE_SIZE_MB}MB.`,
+      message: `Image must be smaller than ${String(IMAGE_VALIDATION.MAX_FILE_SIZE_MB)}MB.`,
     };
   }
 

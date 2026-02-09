@@ -33,7 +33,7 @@ const styles = stylex.create({
   },
 });
 
-export default function PageLayout({ children }: PageLayoutProps) {
+export function PageLayout({ children }: PageLayoutProps) {
   return (
     <div {...stylex.props(styles.pageContainer)}>
       <a href="/" {...stylex.props(styles.backLink)}>

@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
-import PlayerPage from "./pages/PlayerPage";
-import ScoresPage from "./pages/ScoresPage";
-import ScoresPage2 from "./pages/ScoresPage2";
-import EventPage from "./pages/EventPage";
+import { Dashboard } from "./components/Dashboard";
+import { PlayerPage } from "./pages/PlayerPage";
+import { ScoresPage } from "./pages/ScoresPage";
+import { ScoresPage2 } from "./pages/ScoresPage2";
+import { EventPage } from "./pages/EventPage";
 
-export default function App() {
+export function App() {
   return (
     <BrowserRouter>
       <Routes>

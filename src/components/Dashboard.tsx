@@ -143,7 +143,7 @@ const styles = stylex.create({
   },
 });
 
-export default function Dashboard() {
+export function Dashboard() {
   const navigate = useNavigate();
 
   return (

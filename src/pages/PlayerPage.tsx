@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
@@ -262,7 +262,7 @@ const styles = stylex.create({
   },
 });
 
-export default function PlayerPage() {
+export function PlayerPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [playerImageUrl, setPlayerImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");

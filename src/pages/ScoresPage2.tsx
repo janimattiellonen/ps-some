@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
@@ -202,7 +202,7 @@ const styles = stylex.create({
   },
 });
 
-export default function ScoresPage2() {
+export function ScoresPage2() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
 
@@ -227,6 +227,7 @@ export default function ScoresPage2() {
   });
 
   const formValues = watch();
+  const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplate);
 
   const handleDownload = async () => {
     await downloadAsImage(containerRef.current, "competition-scores.png");
@@ -305,18 +306,18 @@ export default function ScoresPage2() {
             ref={containerRef}
             {...stylex.props(styles.container)}
             style={{
-              backgroundImage: `linear-gradient(to bottom, ${TEMPLATES.find((t) => t.id === selectedTemplate)?.gradientFrom}, ${TEMPLATES.find((t) => t.id === selectedTemplate)?.gradientTo})`,
+              backgroundImage: `linear-gradient(to bottom, ${currentTemplate?.gradientFrom ?? ""}, ${currentTemplate?.gradientTo ?? ""})`,
             }}
             aria-live="polite"
           >
             <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
             <img
-              src={TEMPLATES.find((t) => t.id === selectedTemplate)?.doodlesSrc}
+              src={currentTemplate?.doodlesSrc}
               alt=""
               role="presentation"
               {...stylex.props(styles.templateImage)}
             />
-            {(formValues.titleRow1 || formValues.titleRow2 || formValues.titleRow3) && (
+            {(formValues.titleRow1 ?? formValues.titleRow2 ?? formValues.titleRow3) && (
               <div {...stylex.props(styles.headerGroup)}>
                 {formValues.titleRow1 && (
                   <span {...stylex.props(styles.titleRow)}>{formValues.titleRow1}</span>
@@ -356,15 +357,14 @@ export default function ScoresPage2() {
             <div
               {...stylex.props(styles.innerRectangle)}
               style={{
-                backgroundColor: TEMPLATES.find((t) => t.id === selectedTemplate)
-                  ?.innerRectangleColor,
+                backgroundColor: currentTemplate?.innerRectangleColor,
               }}
               aria-hidden="true"
             />
             <div
               {...stylex.props(styles.innerBorder)}
               style={{
-                boxShadow: `inset 0 0 0 3px ${TEMPLATES.find((t) => t.id === selectedTemplate)?.innerBorderColor}`,
+                boxShadow: `inset 0 0 0 3px ${currentTemplate?.innerBorderColor ?? ""}`,
               }}
               aria-hidden="true"
             />

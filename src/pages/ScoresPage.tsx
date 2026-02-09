@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
@@ -147,7 +147,7 @@ const styles = stylex.create({
   },
 });
 
-export default function ScoresPage() {
+export function ScoresPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
 
@@ -254,7 +254,7 @@ export default function ScoresPage() {
               role="presentation"
               {...stylex.props(styles.templateImage)}
             />
-            {(formValues.titleRow1 || formValues.titleRow2 || formValues.titleRow3) && (
+            {(formValues.titleRow1 ?? formValues.titleRow2 ?? formValues.titleRow3) && (
               <div {...stylex.props(styles.headerGroup)}>
                 {formValues.titleRow1 && (
                   <span {...stylex.props(styles.titleRow)}>{formValues.titleRow1}</span>

@@ -10,7 +10,7 @@ import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
@@ -391,7 +391,7 @@ const styles = stylex.create({
   },
 });
 
-export default function EventPage() {
+export function EventPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const previewWrapperRef = useRef<HTMLDivElement>(null);
   const [selectedVersion, setSelectedVersion] = useState<VersionId>("standard");
@@ -420,7 +420,9 @@ export default function EventPage() {
     });
 
     observer.observe(wrapper);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -590,7 +592,9 @@ export default function EventPage() {
                   <button
                     key={version.id}
                     type="button"
-                    onClick={() => setSelectedVersion(version.id)}
+                    onClick={() => {
+                      setSelectedVersion(version.id);
+                    }}
                     {...stylex.props(
                       styles.versionButton,
                       selectedVersion === version.id && styles.versionButtonSelected
@@ -938,9 +942,9 @@ export default function EventPage() {
                             {formValues.subtitle}
                           </p>
                         )}
-                        {(formValues.row1 ||
-                          formValues.row2 ||
-                          formValues.row3 ||
+                        {(formValues.row1 ??
+                          formValues.row2 ??
+                          formValues.row3 ??
                           formValues.row4) && <div {...stylex.props(styles.divider)} />}
                         {formValues.row1 && (
                           <p

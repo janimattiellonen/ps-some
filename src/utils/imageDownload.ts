@@ -10,7 +10,7 @@ import { snapdom } from "@zumer/snapdom";
 export async function downloadAsImage(
   element: HTMLElement | null,
   filename: string,
-  scale: number = 2
+  scale = 2
 ): Promise<void> {
   if (!element) {
     console.warn("downloadAsImage: Element not found");
@@ -30,7 +30,7 @@ export async function downloadAsImage(
  */
 export async function captureAsImageBitmap(
   element: HTMLElement | null,
-  scale: number = 2
+  scale = 2
 ): Promise<ImageBitmap | null> {
   if (!element) {
     console.warn("captureAsImageBitmap: Element not found");

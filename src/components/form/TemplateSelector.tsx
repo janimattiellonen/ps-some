@@ -49,7 +49,7 @@ export function TemplateSelector<T extends readonly BaseTemplate[]>({
               />
             ) : (
               <img
-                src={(srcKey === "srcNoPdga" && template.srcNoPdga) || template.src}
+                src={srcKey === "srcNoPdga" ? (template.srcNoPdga ?? template.src) : template.src}
                 alt={template.label}
                 {...stylex.props(templateSelectorStyles.templateThumbnail)}
               />
