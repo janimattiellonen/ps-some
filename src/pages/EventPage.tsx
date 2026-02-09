@@ -15,6 +15,7 @@ import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../st
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
+import { FontSizeSlider } from "../components/form/FontSizeSlider";
 import { TEMPLATE_COLORS } from "../styles/colors";
 import { downloadAsImage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
@@ -367,28 +368,6 @@ const styles = stylex.create({
     flexDirection: "column",
     gap: "0.375rem",
   },
-  fontSizeControl: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-  },
-  fontSizeLabel: {
-    fontSize: "0.75rem",
-    fontWeight: "500",
-    color: "#6b7280",
-    whiteSpace: "nowrap",
-  },
-  fontSizeSlider: {
-    flex: 1,
-    height: "0.25rem",
-    cursor: "pointer",
-  },
-  fontSizeValue: {
-    minWidth: "2.5rem",
-    fontSize: "0.75rem",
-    color: "#6b7280",
-    textAlign: "right",
-  },
 });
 
 export function EventPage() {
@@ -630,23 +609,13 @@ export function EventPage() {
               <>
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="title" label="Title" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="titleFontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="titleFontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.title.min}
-                      max={FONT_SIZE_DEFAULTS.title.max}
-                      step="1"
-                      {...register("titleFontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>
-                      {formValues.titleFontSize}px
-                    </span>
-                  </div>
+                  <FontSizeSlider
+                    id="titleFontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.title.min}
+                    max={FONT_SIZE_DEFAULTS.title.max}
+                    value={formValues.titleFontSize ?? FONT_SIZE_DEFAULTS.title.value}
+                  />
                   <CheckboxField
                     id="titleCaps"
                     label="Use CAPS"
@@ -657,23 +626,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="subtitle" label="Subtitle" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="subtitleFontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="subtitleFontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.subtitle.min}
-                      max={FONT_SIZE_DEFAULTS.subtitle.max}
-                      step="1"
-                      {...register("subtitleFontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>
-                      {formValues.subtitleFontSize}px
-                    </span>
-                  </div>
+                  <FontSizeSlider
+                    id="subtitleFontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.subtitle.min}
+                    max={FONT_SIZE_DEFAULTS.subtitle.max}
+                    value={formValues.subtitleFontSize ?? FONT_SIZE_DEFAULTS.subtitle.value}
+                  />
                   <CheckboxField
                     id="subtitleCaps"
                     label="Use CAPS"
@@ -684,21 +643,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="row1" label="Row 1" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="row1FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="row1FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.row.min}
-                      max={FONT_SIZE_DEFAULTS.row.max}
-                      step="1"
-                      {...register("row1FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>{formValues.row1FontSize}px</span>
-                  </div>
+                  <FontSizeSlider
+                    id="row1FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.row.min}
+                    max={FONT_SIZE_DEFAULTS.row.max}
+                    value={formValues.row1FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                  />
                   <CheckboxField
                     id="row1Caps"
                     label="Use CAPS"
@@ -709,21 +660,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="row2" label="Row 2" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="row2FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="row2FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.row.min}
-                      max={FONT_SIZE_DEFAULTS.row.max}
-                      step="1"
-                      {...register("row2FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>{formValues.row2FontSize}px</span>
-                  </div>
+                  <FontSizeSlider
+                    id="row2FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.row.min}
+                    max={FONT_SIZE_DEFAULTS.row.max}
+                    value={formValues.row2FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                  />
                   <CheckboxField
                     id="row2Caps"
                     label="Use CAPS"
@@ -734,21 +677,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="row3" label="Row 3" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="row3FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="row3FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.row.min}
-                      max={FONT_SIZE_DEFAULTS.row.max}
-                      step="1"
-                      {...register("row3FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>{formValues.row3FontSize}px</span>
-                  </div>
+                  <FontSizeSlider
+                    id="row3FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.row.min}
+                    max={FONT_SIZE_DEFAULTS.row.max}
+                    value={formValues.row3FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                  />
                   <CheckboxField
                     id="row3Caps"
                     label="Use CAPS"
@@ -759,21 +694,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="row4" label="Row 4" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="row4FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="row4FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.row.min}
-                      max={FONT_SIZE_DEFAULTS.row.max}
-                      step="1"
-                      {...register("row4FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>{formValues.row4FontSize}px</span>
-                  </div>
+                  <FontSizeSlider
+                    id="row4FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.row.min}
+                    max={FONT_SIZE_DEFAULTS.row.max}
+                    value={formValues.row4FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                  />
                   <CheckboxField
                     id="row4Caps"
                     label="Use CAPS"
@@ -789,23 +716,13 @@ export function EventPage() {
               <>
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="overlayRow1" label="Text row 1" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="overlayRow1FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="overlayRow1FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.overlayRow.min}
-                      max={FONT_SIZE_DEFAULTS.overlayRow.max}
-                      step="1"
-                      {...register("overlayRow1FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>
-                      {formValues.overlayRow1FontSize}px
-                    </span>
-                  </div>
+                  <FontSizeSlider
+                    id="overlayRow1FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.overlayRow.min}
+                    max={FONT_SIZE_DEFAULTS.overlayRow.max}
+                    value={formValues.overlayRow1FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value}
+                  />
                   <CheckboxField
                     id="overlayRow1Caps"
                     label="Use CAPS"
@@ -816,23 +733,13 @@ export function EventPage() {
 
                 <div {...stylex.props(styles.textFieldGroup)}>
                   <TextField id="overlayRow2" label="Text row 2" register={register} />
-                  <div {...stylex.props(styles.fontSizeControl)}>
-                    <label htmlFor="overlayRow2FontSize" {...stylex.props(styles.fontSizeLabel)}>
-                      Size
-                    </label>
-                    <input
-                      id="overlayRow2FontSize"
-                      type="range"
-                      min={FONT_SIZE_DEFAULTS.overlayRow.min}
-                      max={FONT_SIZE_DEFAULTS.overlayRow.max}
-                      step="1"
-                      {...register("overlayRow2FontSize", { valueAsNumber: true })}
-                      {...stylex.props(styles.fontSizeSlider)}
-                    />
-                    <span {...stylex.props(styles.fontSizeValue)}>
-                      {formValues.overlayRow2FontSize}px
-                    </span>
-                  </div>
+                  <FontSizeSlider
+                    id="overlayRow2FontSize"
+                    register={register}
+                    min={FONT_SIZE_DEFAULTS.overlayRow.min}
+                    max={FONT_SIZE_DEFAULTS.overlayRow.max}
+                    value={formValues.overlayRow2FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value}
+                  />
                   <CheckboxField
                     id="overlayRow2Caps"
                     label="Use CAPS"
