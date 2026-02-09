@@ -280,7 +280,9 @@ export function PlayerPage() {
     const file = e.target.files?.[0];
     setImageError("");
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -307,7 +309,9 @@ export function PlayerPage() {
 
   const handlePointerMove = (e: PointerEvent<HTMLImageElement>) => {
     const dragStart = dragStartRef.current;
-    if (!isDragging || !dragStart) return;
+    if (!isDragging || !dragStart) {
+      return;
+    }
 
     const newX = dragStart.transformX + (e.clientX - dragStart.x);
     const newY = dragStart.transformY + (e.clientY - dragStart.y);

@@ -24,29 +24,9 @@ A web app for generating social media images for disc golf events.
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check formatting
 
-## Code Style
+## Code conventions
 
-- Prefer `type` over `interface`
-- Use type-only imports for types
-- Avoid `any` - use proper types
-
-Always use {}
-
-DO:
-
-````
-    if (!file) {
-      return;
-    }
-```
-
-DON'T:
-
-```
-    if (!file) return;
-```
-
-
+Include file .claude/ts-coding-conventions.md
 
 # Git conventions
 

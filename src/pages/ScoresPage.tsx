@@ -274,7 +274,9 @@ export function ScoresPage() {
               const rowText = formValues[rowKey];
               const isMember = formValues[memberKey];
 
-              if (!rowText) return null;
+              if (!rowText) {
+                return null;
+              }
 
               return (
                 <span key={num} {...stylex.props(styles.scoreRowBase, styles[style])}>

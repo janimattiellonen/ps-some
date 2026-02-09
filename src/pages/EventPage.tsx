@@ -410,11 +410,15 @@ export function EventPage() {
 
   useEffect(() => {
     const wrapper = previewWrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper) {
+      return;
+    }
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (!entry) return;
+      if (!entry) {
+        return;
+      }
       const width = entry.contentRect.width;
       setDisplayScale(Math.min(width / TEMPLATE_WIDTH, 1));
     });
@@ -429,7 +433,9 @@ export function EventPage() {
     const file = e.target.files?.[0];
     setImageError("");
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -456,7 +462,9 @@ export function EventPage() {
 
   const handlePointerMove = (e: PointerEvent<HTMLImageElement>) => {
     const dragStart = dragStartRef.current;
-    if (!isDragging || !dragStart) return;
+    if (!isDragging || !dragStart) {
+      return;
+    }
 
     const newX = dragStart.transformX + (e.clientX - dragStart.x) / displayScale;
     const newY = dragStart.transformY + (e.clientY - dragStart.y) / displayScale;
@@ -540,7 +548,9 @@ export function EventPage() {
 
   const handleDownload = async () => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el) {
+      return;
+    }
 
     // Temporarily remove display scale for capture
     el.style.transform = "none";
