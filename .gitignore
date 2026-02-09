@@ -31,5 +31,8 @@ coverage
 .cache
 .eslintcache
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Source templates
 /templates

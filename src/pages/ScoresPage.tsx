@@ -35,7 +35,9 @@ const SCORE_ROWS = [
 ] as const;
 
 const schema = z.object({
-  competitionName: z.string().optional(),
+  titleRow1: z.string().optional(),
+  titleRow2: z.string().optional(),
+  titleRow3: z.string().optional(),
   row1: z.string().optional(),
   row1Member: z.boolean().optional(),
   row2: z.string().optional(),
@@ -65,34 +67,36 @@ const styles = stylex.create({
     width: "100%",
     height: "100%",
   },
-  competitionName: {
+  headerGroup: {
     position: "absolute",
     top: `${String((70 / TEMPLATE_HEIGHT) * 100)}%`,
     left: 0,
     width: "100%",
-    color: "#1e3a5f",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    paddingLeft: "15%",
+    paddingRight: "15%",
+    boxSizing: "border-box",
+  },
+  titleRow: {
+    color: "#1e3a5f",
     textAlign: "center",
-    fontSize: "clamp(1.25rem, 6vw, 1.75rem)",
+    fontSize: "clamp(1rem, 5vw, 1.5rem)",
     fontWeight: "bold",
     textTransform: "uppercase",
   },
+  titleRowSmall: {
+    fontSize: "clamp(0.85rem, 4vw, 1.25rem)",
+  },
   resultsLabel: {
-    position: "absolute",
-    top: `${String((105 / TEMPLATE_HEIGHT) * 100)}%`,
-    left: 0,
-    width: "100%",
     color: "#1e3a5f",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
     textAlign: "center",
     fontSize: "clamp(0.75rem, 3vw, 1rem)",
     fontWeight: "bold",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
+    marginTop: 4,
   },
   scoreRowBase: {
     position: "absolute",
@@ -150,7 +154,9 @@ export default function ScoresPage() {
   const { register, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      competitionName: "",
+      titleRow1: "",
+      titleRow2: "",
+      titleRow3: "",
       row1: "",
       row1Member: false,
       row2: "",
@@ -188,7 +194,9 @@ export default function ScoresPage() {
               Competition Scores
             </h2>
 
-            <TextField id="competitionName" label="Competition name" register={register} />
+            <TextField id="titleRow1" label="Title row 1" register={register} />
+            <TextField id="titleRow2" label="Title row 2" register={register} />
+            <TextField id="titleRow3" label="Title row 3" register={register} />
 
             {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
               <div key={num} {...stylex.props(formStyles.fieldGroup)}>
@@ -246,11 +254,21 @@ export default function ScoresPage() {
               role="presentation"
               {...stylex.props(styles.templateImage)}
             />
-            {formValues.competitionName && (
-              <span {...stylex.props(styles.competitionName)}>{formValues.competitionName}</span>
-            )}
-            {formValues.competitionName && (
-              <span {...stylex.props(styles.resultsLabel)}>Tulokset</span>
+            {(formValues.titleRow1 || formValues.titleRow2 || formValues.titleRow3) && (
+              <div {...stylex.props(styles.headerGroup)}>
+                {formValues.titleRow1 && (
+                  <span {...stylex.props(styles.titleRow)}>{formValues.titleRow1}</span>
+                )}
+                {formValues.titleRow2 && (
+                  <span {...stylex.props(styles.titleRow)}>{formValues.titleRow2}</span>
+                )}
+                {formValues.titleRow3 && (
+                  <span {...stylex.props(styles.titleRow, styles.titleRowSmall)}>
+                    {formValues.titleRow3}
+                  </span>
+                )}
+                <span {...stylex.props(styles.resultsLabel)}>Tulokset</span>
+              </div>
             )}
             {SCORE_ROWS.map(({ num, rowKey, memberKey, style }) => {
               const rowText = formValues[rowKey];

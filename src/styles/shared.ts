@@ -12,6 +12,7 @@ export const layoutStyles = stylex.create({
       default: "stretch",
       "@media (min-width: 900px)": "flex-start",
     },
+    width: "100%",
   },
   formColumn: {
     flex: {
@@ -134,6 +135,11 @@ export const templateSelectorStyles = stylex.create({
     display: "block",
     width: 80,
     height: "auto",
+  },
+  templateColorSwatch: {
+    display: "block",
+    width: 80,
+    height: 100,
   },
   templateRadio: {
     position: "absolute",

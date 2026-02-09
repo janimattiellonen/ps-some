@@ -8,14 +8,14 @@ import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../st
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
-import { downloadAsImage } from "../utils/imageDownload";
+import { downloadAsImage, captureAsImageBitmap, downloadMontage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
 
 type ImageTransform = { x: number; y: number; scale: number };
 
 const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
 
-const TEMPLATE_WIDTH = 551;
+const TEMPLATE_WIDTH = 552;
 const TEMPLATE_HEIGHT = 690;
 
 const TEMPLATES = [
@@ -185,7 +185,7 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "clamp(0.75rem, 4.5vw, 1.5rem)",
+    fontSize: "clamp(0.75rem, 4.5vw, 1.4rem)",
     fontWeight: "bold",
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.8)",
   },
@@ -232,7 +232,7 @@ const styles = stylex.create({
     left: "50%",
     transform: "translateX(-50%)",
     width: "auto",
-    height: 90,
+    height: 70,
     pointerEvents: "none",
   },
   buttonGroup: {
@@ -389,6 +389,31 @@ export default function PlayerPage() {
 
     // Restore original template
     setSelectedTemplate(originalTemplate);
+  };
+
+  const handleDownloadMontage = async () => {
+    const originalTemplate = selectedTemplate;
+    const suffix = formValues.hidePdga ? "-no-pdga" : "";
+    const capturedImages: ImageBitmap[] = [];
+
+    for (const template of TEMPLATES) {
+      setSelectedTemplate(template.id);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const imageBitmap = await captureAsImageBitmap(containerRef.current);
+      if (imageBitmap) {
+        capturedImages.push(imageBitmap);
+      }
+    }
+
+    // Restore original template
+    setSelectedTemplate(originalTemplate);
+
+    // Download the montage at reduced size
+    await downloadMontage(capturedImages, {
+      filename: `player-profile-montage${suffix}.png`,
+      targetWidth: 1500,
+      targetHeight: 376,
+    });
   };
 
   return (
@@ -551,9 +576,17 @@ export default function PlayerPage() {
               type="button"
               onClick={() => void handleDownloadAllVersions()}
               {...stylex.props(styles.secondaryButton)}
-              aria-label="Download both PDGA and no-PDGA versions"
+              aria-label="Download all color versions as separate files"
             >
               Download all versions
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadMontage()}
+              {...stylex.props(styles.secondaryButton)}
+              aria-label="Download all color versions combined in a single image"
+            >
+              Download montage
             </button>
           </div>
 

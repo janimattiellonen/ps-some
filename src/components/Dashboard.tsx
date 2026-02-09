@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import * as stylex from "@stylexjs/stylex";
+import { TEMPLATE_COLORS } from "../styles/colors";
 
 const FEATURES = [
   {
@@ -40,7 +41,10 @@ const FEATURES = [
     title: "Event Poster",
     description: "Create event announcement posters",
     route: "/event",
-    templates: [{ src: "/images/templates/oittaa.png", label: "Forest" }],
+    templates: [
+      { color: TEMPLATE_COLORS.blue.solid, label: "Blue" },
+      { color: TEMPLATE_COLORS.pink.solid, label: "Pink" },
+    ],
   },
 ] as const;
 
@@ -131,6 +135,12 @@ const styles = stylex.create({
     color: "#9ca3af",
     fontWeight: "500",
   },
+  templateColorSwatch: {
+    width: 80,
+    height: 100,
+    borderRadius: "0.375rem",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
 });
 
 export default function Dashboard() {
@@ -166,11 +176,19 @@ export default function Dashboard() {
             <div {...stylex.props(styles.templatesContainer)}>
               {feature.templates.map((template) => (
                 <div key={template.label} {...stylex.props(styles.templatePreview)}>
-                  <img
-                    src={template.src}
-                    alt={`${template.label} template preview`}
-                    {...stylex.props(styles.templateImage)}
-                  />
+                  {"src" in template ? (
+                    <img
+                      src={template.src}
+                      alt={`${template.label} template preview`}
+                      {...stylex.props(styles.templateImage)}
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      style={{ backgroundColor: template.color }}
+                      {...stylex.props(styles.templateColorSwatch)}
+                    />
+                  )}
                   <span {...stylex.props(styles.templateLabel)}>{template.label}</span>
                 </div>
               ))}
