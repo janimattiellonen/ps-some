@@ -19,9 +19,9 @@ import { TEMPLATE_COLORS } from "../styles/colors";
 import { downloadAsImage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
 
-type ImageTransform = { x: number; y: number; scale: number };
+type ImageTransform = { x: number; y: number };
 
-const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
+const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0 };
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
@@ -355,54 +355,6 @@ const styles = stylex.create({
   dragging: {
     cursor: "grabbing",
   },
-  imageControls: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.75rem",
-    marginTop: "1rem",
-    padding: "1rem",
-    backgroundColor: "#f3f4f6",
-    borderRadius: "0.5rem",
-    width: "100%",
-    maxWidth: PREVIEW_MAX_WIDTH,
-  },
-  zoomControl: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-  },
-  zoomSlider: {
-    flex: 1,
-    height: "0.5rem",
-    cursor: "pointer",
-  },
-  zoomValue: {
-    minWidth: "3rem",
-    fontSize: "0.875rem",
-    color: "#374151",
-    textAlign: "right",
-  },
-  resetButton: {
-    padding: "0.5rem 1rem",
-    fontSize: "0.875rem",
-    fontWeight: "600",
-    cursor: "pointer",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#d1d5db",
-    borderRadius: "0.375rem",
-    backgroundColor: "#ffffff",
-    color: "#374151",
-    alignSelf: "flex-start",
-    ":hover": {
-      backgroundColor: "#f9fafb",
-      borderColor: "#9ca3af",
-    },
-    ":focus": {
-      outline: "2px solid #2563eb",
-      outlineOffset: "2px",
-    },
-  },
   positionHint: {
     fontSize: "0.75rem",
     color: "#6b7280",
@@ -518,17 +470,6 @@ export default function EventPage() {
     e.currentTarget.releasePointerCapture(e.pointerId);
     setIsDragging(false);
     dragStartRef.current = null;
-  };
-
-  const handleZoomChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setImageTransform((prev) => ({
-      ...prev,
-      scale: parseFloat(e.target.value),
-    }));
-  };
-
-  const handleResetTransform = () => {
-    setImageTransform(DEFAULT_TRANSFORM);
   };
 
   const handleImageKeyDown = (e: KeyboardEvent<HTMLImageElement>) => {
@@ -928,8 +869,6 @@ export default function EventPage() {
                       onPointerCancel={handlePointerUp}
                       onKeyDown={handleImageKeyDown}
                       style={{
-                        width: `${String(imageTransform.scale * 100)}%`,
-                        height: `${String(imageTransform.scale * 100)}%`,
                         transform: `translate(${String(imageTransform.x)}px, ${String(imageTransform.y)}px)`,
                       }}
                       {...stylex.props(
@@ -1104,39 +1043,10 @@ export default function EventPage() {
           </button>
 
           {backgroundImageUrl && (
-            <>
-              <p {...stylex.props(styles.positionHint)}>
-                Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
-                movements.
-              </p>
-              <div {...stylex.props(styles.imageControls)}>
-                <div {...stylex.props(styles.zoomControl)}>
-                  <label htmlFor="zoom-slider" {...stylex.props(formStyles.label)}>
-                    Zoom
-                  </label>
-                  <input
-                    id="zoom-slider"
-                    type="range"
-                    min="0.5"
-                    max="3"
-                    step="0.1"
-                    value={imageTransform.scale}
-                    onChange={handleZoomChange}
-                    {...stylex.props(styles.zoomSlider)}
-                  />
-                  <span {...stylex.props(styles.zoomValue)} aria-live="polite">
-                    {imageTransform.scale.toFixed(1)}x
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleResetTransform}
-                  {...stylex.props(styles.resetButton)}
-                >
-                  Reset position
-                </button>
-              </div>
-            </>
+            <p {...stylex.props(styles.positionHint)}>
+              Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
+              movements.
+            </p>
           )}
         </div>
       </div>
