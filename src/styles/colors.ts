@@ -20,7 +20,9 @@ export const THEME_COLORS = {
 } as const;
 
 // Helper function to create rgba string
-const rgba = (r: number, g: number, b: number, a: number): string => `rgba(${r}, ${g}, ${b}, ${a})`;
+const rgba = (r: number, g: number, b: number, a: number): string => {
+  return `rgba(${String(r)}, ${String(g)}, ${String(b)}, ${String(a)})`;
+};
 
 // Pre-computed color values for common use cases
 export const TEMPLATE_COLORS = {

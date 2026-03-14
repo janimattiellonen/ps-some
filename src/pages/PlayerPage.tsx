@@ -3,29 +3,59 @@ import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
 import { TextField } from "../components/form/TextField";
-import { downloadAsImage } from "../utils/imageDownload";
+import { CheckboxField } from "../components/form/CheckboxField";
+import { downloadAsImage, captureAsImageBitmap, downloadMontage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
 
 type ImageTransform = { x: number; y: number; scale: number };
 
 const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0, scale: 1 };
 
-const TEMPLATE_WIDTH = 551;
+const TEMPLATE_WIDTH = 552;
 const TEMPLATE_HEIGHT = 690;
 
 const TEMPLATES = [
-  { id: "green", src: "/images/templates/player-profile-green.png", label: "Green template" },
-  { id: "pink", src: "/images/templates/player-profile-pink.png", label: "Pink template" },
+  {
+    id: "green",
+    src: "/images/templates/player-profile-green.png",
+    srcNoPdga: "/images/templates/player-profile-green-no-pdga.png",
+    label: "Green template",
+  },
+  {
+    id: "pink",
+    src: "/images/templates/player-profile-pink.png",
+    srcNoPdga: "/images/templates/player-profile-pink-no-pdga.png",
+    label: "Pink template",
+  },
+  {
+    id: "blue",
+    src: "/images/templates/player-profile-blue.png",
+    srcNoPdga: "/images/templates/player-profile-blue-no-pdga.png",
+    label: "Blue template",
+  },
+  {
+    id: "golden",
+    src: "/images/templates/player-profile-golden.png",
+    srcNoPdga: "/images/templates/player-profile-golden-no-pdga.png",
+    label: "Golden template",
+  },
+  {
+    id: "gray",
+    src: "/images/templates/player-profile-gray.png",
+    srcNoPdga: "/images/templates/player-profile-gray-no-pdga.png",
+    label: "Gray template",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
 const schema = z.object({
   pdgaNumber: z.string().optional(),
+  hidePdga: z.boolean().optional(),
   name: z.string().optional(),
   row2: z.string().optional(),
   row3: z.string().optional(),
@@ -39,6 +69,18 @@ const styles = stylex.create({
     width: TEMPLATE_WIDTH,
     height: TEMPLATE_HEIGHT,
     overflow: "hidden",
+    borderRadius: "0.5rem",
+  },
+  borderOverlay: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
+    boxShadow: "inset 0 0 0 3px #6b7280",
+    borderRadius: "0.5rem",
+    pointerEvents: "none",
+    zIndex: 10,
   },
   error: {
     fontSize: "0.875rem",
@@ -143,7 +185,7 @@ const styles = stylex.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "clamp(0.75rem, 4.5vw, 1.5rem)",
+    fontSize: "clamp(0.75rem, 4.5vw, 1.4rem)",
     fontWeight: "bold",
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.8)",
   },
@@ -173,9 +215,54 @@ const styles = stylex.create({
     fontSize: "clamp(0.875rem, 4vw, 1.25rem)",
     fontWeight: "bold",
   },
+  pdgaRow: {
+    display: "flex",
+    gap: "1rem",
+    alignItems: "flex-end",
+  },
+  pdgaFieldWrapper: {
+    flex: 1,
+  },
+  hideCheckboxWrapper: {
+    paddingBottom: "0.5rem",
+  },
+  clubLogo: {
+    position: "absolute",
+    bottom: `${String((40 / TEMPLATE_HEIGHT) * 100)}%`,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "auto",
+    height: 70,
+    pointerEvents: "none",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  secondaryButton: {
+    padding: "0.75rem 1.5rem",
+    fontSize: "1rem",
+    fontWeight: "bold",
+    cursor: "pointer",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#d1d5db",
+    borderRadius: "0.5rem",
+    backgroundColor: "#ffffff",
+    color: "#374151",
+    ":focus": {
+      outline: "3px solid #2563eb",
+      outlineOffset: "2px",
+    },
+    ":hover": {
+      backgroundColor: "#f9fafb",
+      borderColor: "#9ca3af",
+    },
+  },
 });
 
-export default function PlayerPage() {
+export function PlayerPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [playerImageUrl, setPlayerImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
@@ -193,7 +280,9 @@ export default function PlayerPage() {
     const file = e.target.files?.[0];
     setImageError("");
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -220,7 +309,9 @@ export default function PlayerPage() {
 
   const handlePointerMove = (e: PointerEvent<HTMLImageElement>) => {
     const dragStart = dragStartRef.current;
-    if (!isDragging || !dragStart) return;
+    if (!isDragging || !dragStart) {
+      return;
+    }
 
     const newX = dragStart.transformX + (e.clientX - dragStart.x);
     const newY = dragStart.transformY + (e.clientY - dragStart.y);
@@ -277,6 +368,7 @@ export default function PlayerPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       pdgaNumber: "",
+      hidePdga: false,
       name: "",
       row2: "",
       row3: "",
@@ -287,6 +379,45 @@ export default function PlayerPage() {
 
   const handleDownload = async () => {
     await downloadAsImage(containerRef.current, "player-profile.png");
+  };
+
+  const handleDownloadAllVersions = async () => {
+    const originalTemplate = selectedTemplate;
+    const suffix = formValues.hidePdga ? "-no-pdga" : "";
+
+    for (const template of TEMPLATES) {
+      setSelectedTemplate(template.id);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await downloadAsImage(containerRef.current, `player-profile-${template.id}${suffix}.png`);
+    }
+
+    // Restore original template
+    setSelectedTemplate(originalTemplate);
+  };
+
+  const handleDownloadMontage = async () => {
+    const originalTemplate = selectedTemplate;
+    const suffix = formValues.hidePdga ? "-no-pdga" : "";
+    const capturedImages: ImageBitmap[] = [];
+
+    for (const template of TEMPLATES) {
+      setSelectedTemplate(template.id);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const imageBitmap = await captureAsImageBitmap(containerRef.current);
+      if (imageBitmap) {
+        capturedImages.push(imageBitmap);
+      }
+    }
+
+    // Restore original template
+    setSelectedTemplate(originalTemplate);
+
+    // Download the montage at reduced size
+    await downloadMontage(capturedImages, {
+      filename: `player-profile-montage${suffix}.png`,
+      targetWidth: 1500,
+      targetHeight: 376,
+    });
   };
 
   return (
@@ -325,12 +456,20 @@ export default function PlayerPage() {
               )}
             </div>
 
-            <TextField
-              id="pdgaNumber"
-              label="PDGA Number"
-              register={register}
-              inputMode="numeric"
-            />
+            <div {...stylex.props(styles.pdgaRow)}>
+              <div {...stylex.props(styles.pdgaFieldWrapper)}>
+                <TextField
+                  id="pdgaNumber"
+                  label="PDGA Number"
+                  register={register}
+                  inputMode="numeric"
+                  disabled={formValues.hidePdga}
+                />
+              </div>
+              <div {...stylex.props(styles.hideCheckboxWrapper)}>
+                <CheckboxField id="hidePdga" label="Hide" register={register} variant="compact" />
+              </div>
+            </div>
 
             <TextField id="name" label="Name" register={register} autoComplete="name" />
 
@@ -352,6 +491,7 @@ export default function PlayerPage() {
               templates={TEMPLATES}
               selectedId={selectedTemplate}
               onSelect={setSelectedTemplate}
+              srcKey={formValues.hidePdga ? "srcNoPdga" : "src"}
             />
           </form>
         </div>
@@ -397,12 +537,16 @@ export default function PlayerPage() {
               </>
             )}
             <img
-              src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
+              src={
+                formValues.hidePdga
+                  ? TEMPLATES.find((t) => t.id === selectedTemplate)?.srcNoPdga
+                  : TEMPLATES.find((t) => t.id === selectedTemplate)?.src
+              }
               alt=""
               role="presentation"
               {...stylex.props(styles.templateOverlay)}
             />
-            {formValues.pdgaNumber && (
+            {formValues.pdgaNumber && !formValues.hidePdga && (
               <span {...stylex.props(styles.pdgaNumber)}>{formValues.pdgaNumber}</span>
             )}
             {formValues.name && (
@@ -414,16 +558,41 @@ export default function PlayerPage() {
             {formValues.row3 && (
               <span {...stylex.props(styles.textRowBase, styles.textRow3)}>{formValues.row3}</span>
             )}
+            <img
+              src="/images/ps-logo-white.png"
+              alt=""
+              role="presentation"
+              {...stylex.props(styles.clubLogo)}
+            />
+            <div {...stylex.props(styles.borderOverlay)} aria-hidden="true" />
           </div>
 
-          <button
-            type="submit"
-            form="player-profile-form"
-            {...stylex.props(formStyles.button)}
-            aria-label="Download player profile image as PNG"
-          >
-            Download image
-          </button>
+          <div {...stylex.props(styles.buttonGroup)}>
+            <button
+              type="submit"
+              form="player-profile-form"
+              {...stylex.props(formStyles.button)}
+              aria-label="Download player profile image as PNG"
+            >
+              Download image
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadAllVersions()}
+              {...stylex.props(styles.secondaryButton)}
+              aria-label="Download all color versions as separate files"
+            >
+              Download all versions
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDownloadMontage()}
+              {...stylex.props(styles.secondaryButton)}
+              aria-label="Download all color versions combined in a single image"
+            >
+              Download montage
+            </button>
+          </div>
 
           {playerImageUrl && (
             <>

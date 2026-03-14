@@ -6,8 +6,8 @@ import { z } from "zod";
 import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
-import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
+import { TextFieldWithControls } from "../components/form/TextFieldWithControls";
 import { downloadAsImage } from "../utils/imageDownload";
 
 const TEMPLATE_WIDTH = 419;
@@ -18,13 +18,35 @@ const SCORE_ROWS_TOP = 270;
 const SCORE_ROW_SPACING = 35;
 
 const TEMPLATES = [
-  { id: "blue", src: "/images/templates/scores-blue.png", label: "Blue template" },
-  { id: "green", src: "/images/templates/scores-green.png", label: "Green template" },
+  {
+    id: "blue",
+    src: "/images/templates/scores-blue.png",
+    doodlesSrc: "/images/templates/doodles-white.png",
+    label: "Blue template",
+    gradientFrom: "#063949",
+    gradientTo: "#105c7a",
+    innerRectangleColor: "#1d9ad5",
+    innerBorderColor: "#105c7a",
+  },
+  {
+    id: "green",
+    src: "/images/templates/scores-green.png",
+    doodlesSrc: "/images/templates/doodles-white.png",
+    label: "Green template",
+    gradientFrom: "#093702",
+    gradientTo: "#206b22",
+    innerRectangleColor: "#3db749",
+    innerBorderColor: "#206b22",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
 const CLUB_LOGO_SRC = "/images/ps-logo.png";
+
+const FONT_SIZE_DEFAULTS = {
+  titleRow: { value: 24, min: 12, max: 48 },
+} as const;
 
 const SCORE_ROWS = [
   { num: 1, rowKey: "row1", memberKey: "row1Member", style: "scoreRow1" },
@@ -36,8 +58,14 @@ const SCORE_ROWS = [
 
 const schema = z.object({
   titleRow1: z.string().optional(),
+  titleRow1FontSize: z.number().optional(),
+  titleRow1Caps: z.boolean().optional(),
   titleRow2: z.string().optional(),
+  titleRow2FontSize: z.number().optional(),
+  titleRow2Caps: z.boolean().optional(),
   titleRow3: z.string().optional(),
+  titleRow3FontSize: z.number().optional(),
+  titleRow3Caps: z.boolean().optional(),
   row1: z.string().optional(),
   row1Member: z.boolean().optional(),
   row2: z.string().optional(),
@@ -59,6 +87,41 @@ const styles = stylex.create({
     width: TEMPLATE_WIDTH,
     height: TEMPLATE_HEIGHT,
     overflow: "hidden",
+    borderRadius: "0.5rem",
+  },
+  borderOverlay: {
+    position: "absolute",
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
+    boxShadow: "inset 0 0 0 3px #6b7280",
+    borderRadius: "0.5rem",
+    pointerEvents: "none",
+    zIndex: 10,
+  },
+  innerRectangle: {
+    position: "absolute",
+    top: 55,
+    left: 55,
+    right: 55,
+    bottom: 55,
+  },
+  innerBorder: {
+    position: "absolute",
+    top: 60,
+    left: 60,
+    right: 60,
+    bottom: 60,
+    pointerEvents: "none",
+  },
+  hornImage: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, calc(-50% - 25px))",
+    width: "auto",
+    height: 45,
   },
   templateImage: {
     position: "absolute",
@@ -78,31 +141,18 @@ const styles = stylex.create({
     paddingLeft: "15%",
     paddingRight: "15%",
     boxSizing: "border-box",
+    zIndex: 5,
   },
   titleRow: {
-    color: "#1e3a5f",
+    color: "#ffffff",
     textAlign: "center",
-    fontSize: "clamp(1rem, 5vw, 1.5rem)",
     fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  titleRowSmall: {
-    fontSize: "clamp(0.85rem, 4vw, 1.25rem)",
-  },
-  resultsLabel: {
-    color: "#1e3a5f",
-    textAlign: "center",
-    fontSize: "clamp(0.75rem, 3vw, 1rem)",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    marginTop: 4,
   },
   scoreRowBase: {
     position: "absolute",
     left: 0,
     width: "100%",
-    color: "#1e3a5f",
+    color: "#ffffff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -110,6 +160,7 @@ const styles = stylex.create({
     fontSize: "clamp(0.75rem, 3.5vw, 1rem)",
     fontWeight: "600",
     gap: "0.35rem",
+    zIndex: 5,
   },
   clubLogo: {
     height: "1em",
@@ -147,7 +198,7 @@ const styles = stylex.create({
   },
 });
 
-export function ScoresPage() {
+export function ScoresPage2() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
 
@@ -155,8 +206,14 @@ export function ScoresPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       titleRow1: "",
+      titleRow1FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow1Caps: true,
       titleRow2: "",
+      titleRow2FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow2Caps: true,
       titleRow3: "",
+      titleRow3FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow3Caps: true,
       row1: "",
       row1Member: false,
       row2: "",
@@ -172,6 +229,7 @@ export function ScoresPage() {
   });
 
   const formValues = watch();
+  const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplate);
 
   const handleDownload = async () => {
     await downloadAsImage(containerRef.current, "competition-scores.png");
@@ -194,9 +252,36 @@ export function ScoresPage() {
               Competition Scores
             </h2>
 
-            <TextField id="titleRow1" label="Title row 1" register={register} />
-            <TextField id="titleRow2" label="Title row 2" register={register} />
-            <TextField id="titleRow3" label="Title row 3" register={register} />
+            <TextFieldWithControls
+              textId="titleRow1"
+              label="Title row 1"
+              fontSizeId="titleRow1FontSize"
+              capsId="titleRow1Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow1FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
+            <TextFieldWithControls
+              textId="titleRow2"
+              label="Title row 2"
+              fontSizeId="titleRow2FontSize"
+              capsId="titleRow2Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow2FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
+            <TextFieldWithControls
+              textId="titleRow3"
+              label="Title row 3"
+              fontSizeId="titleRow3FontSize"
+              capsId="titleRow3Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow3FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
 
             {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
               <div key={num} {...stylex.props(formStyles.fieldGroup)}>
@@ -246,10 +331,17 @@ export function ScoresPage() {
             Preview
           </h2>
 
-          <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
+          <div
+            ref={containerRef}
+            {...stylex.props(styles.container)}
+            style={{
+              backgroundImage: `linear-gradient(to bottom, ${currentTemplate?.gradientFrom ?? ""}, ${currentTemplate?.gradientTo ?? ""})`,
+            }}
+            aria-live="polite"
+          >
             <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
             <img
-              src={TEMPLATES.find((t) => t.id === selectedTemplate)?.src}
+              src={currentTemplate?.doodlesSrc}
               alt=""
               role="presentation"
               {...stylex.props(styles.templateImage)}
@@ -257,17 +349,38 @@ export function ScoresPage() {
             {(formValues.titleRow1 ?? formValues.titleRow2 ?? formValues.titleRow3) && (
               <div {...stylex.props(styles.headerGroup)}>
                 {formValues.titleRow1 && (
-                  <span {...stylex.props(styles.titleRow)}>{formValues.titleRow1}</span>
+                  <span
+                    {...stylex.props(styles.titleRow)}
+                    style={{
+                      fontSize: `${String(formValues.titleRow1FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow1Caps ? "uppercase" : "none",
+                    }}
+                  >
+                    {formValues.titleRow1}
+                  </span>
                 )}
                 {formValues.titleRow2 && (
-                  <span {...stylex.props(styles.titleRow)}>{formValues.titleRow2}</span>
+                  <span
+                    {...stylex.props(styles.titleRow)}
+                    style={{
+                      fontSize: `${String(formValues.titleRow2FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow2Caps ? "uppercase" : "none",
+                    }}
+                  >
+                    {formValues.titleRow2}
+                  </span>
                 )}
                 {formValues.titleRow3 && (
-                  <span {...stylex.props(styles.titleRow, styles.titleRowSmall)}>
+                  <span
+                    {...stylex.props(styles.titleRow)}
+                    style={{
+                      fontSize: `${String(formValues.titleRow3FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow3Caps ? "uppercase" : "none",
+                    }}
+                  >
                     {formValues.titleRow3}
                   </span>
                 )}
-                <span {...stylex.props(styles.resultsLabel)}>Tulokset</span>
               </div>
             )}
             {SCORE_ROWS.map(({ num, rowKey, memberKey, style }) => {
@@ -293,6 +406,27 @@ export function ScoresPage() {
                 </span>
               );
             })}
+            <div
+              {...stylex.props(styles.innerRectangle)}
+              style={{
+                backgroundColor: currentTemplate?.innerRectangleColor,
+              }}
+              aria-hidden="true"
+            />
+            <div
+              {...stylex.props(styles.innerBorder)}
+              style={{
+                boxShadow: `inset 0 0 0 3px ${currentTemplate?.innerBorderColor ?? ""}`,
+              }}
+              aria-hidden="true"
+            />
+            <img
+              src="/images/templates/horn-white.png"
+              alt=""
+              aria-hidden="true"
+              {...stylex.props(styles.hornImage)}
+            />
+            <div {...stylex.props(styles.borderOverlay)} aria-hidden="true" />
           </div>
 
           <button

@@ -12,6 +12,7 @@ export const layoutStyles = stylex.create({
       default: "stretch",
       "@media (min-width: 900px)": "flex-start",
     },
+    width: "100%",
   },
   formColumn: {
     flex: {
@@ -66,6 +67,11 @@ export const formStyles = stylex.create({
       boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.1)",
     },
   },
+  inputDisabled: {
+    backgroundColor: "#f3f4f6",
+    color: "#6b7280",
+    cursor: "not-allowed",
+  },
   button: {
     marginTop: "1rem",
     padding: "0.75rem 1.5rem",
@@ -104,7 +110,9 @@ export const templateSelectorStyles = stylex.create({
   templateOptions: {
     display: "flex",
     flexDirection: "row",
-    gap: "1rem",
+    flexWrap: "wrap",
+    gap: "0.5rem",
+    maxWidth: 280,
   },
   templateOption: {
     position: "relative",
@@ -125,8 +133,13 @@ export const templateSelectorStyles = stylex.create({
   },
   templateThumbnail: {
     display: "block",
-    width: 120,
+    width: 80,
     height: "auto",
+  },
+  templateColorSwatch: {
+    display: "block",
+    width: 80,
+    height: 100,
   },
   templateRadio: {
     position: "absolute",

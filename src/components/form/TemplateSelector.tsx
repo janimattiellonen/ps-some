@@ -7,6 +7,8 @@ type TemplateSelectorProps<T extends readonly BaseTemplate[]> = {
   selectedId: T[number]["id"];
   onSelect: (id: T[number]["id"]) => void;
   name?: string;
+  srcKey?: "src" | "srcNoPdga";
+  useColorSwatch?: boolean;
 };
 
 export function TemplateSelector<T extends readonly BaseTemplate[]>({
@@ -14,6 +16,8 @@ export function TemplateSelector<T extends readonly BaseTemplate[]>({
   selectedId,
   onSelect,
   name = "template",
+  srcKey = "src",
+  useColorSwatch = false,
 }: TemplateSelectorProps<T>) {
   return (
     <fieldset {...stylex.props(templateSelectorStyles.templateSelector)}>
@@ -37,11 +41,19 @@ export function TemplateSelector<T extends readonly BaseTemplate[]>({
               }}
               {...stylex.props(templateSelectorStyles.templateRadio)}
             />
-            <img
-              src={template.src}
-              alt={template.label}
-              {...stylex.props(templateSelectorStyles.templateThumbnail)}
-            />
+            {useColorSwatch && "color" in template ? (
+              <div
+                aria-hidden="true"
+                style={{ backgroundColor: template.color as string }}
+                {...stylex.props(templateSelectorStyles.templateColorSwatch)}
+              />
+            ) : (
+              <img
+                src={srcKey === "srcNoPdga" ? (template.srcNoPdga ?? template.src) : template.src}
+                alt={template.label}
+                {...stylex.props(templateSelectorStyles.templateThumbnail)}
+              />
+            )}
           </label>
         ))}
       </div>

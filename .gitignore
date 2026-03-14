@@ -20,6 +20,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Logs
 *.log
 npm-debug.log*
@@ -30,6 +33,9 @@ coverage
 # Cache
 .cache
 .eslintcache
+
+# TypeScript build info
+*.tsbuildinfo
 
 # Source templates
 /templates

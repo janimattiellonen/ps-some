@@ -6,6 +6,7 @@ export type BaseTemplate = {
   id: string;
   src: string;
   label: string;
+  srcNoPdga?: string;
 };
 
 export type ColoredTemplate = BaseTemplate & {

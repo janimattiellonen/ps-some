@@ -10,6 +10,7 @@ type TextFieldProps<T extends FieldValues> = {
   autoComplete?: string;
   inputMode?: "text" | "numeric";
   hint?: string;
+  disabled?: boolean;
 };
 
 export function TextField<T extends FieldValues>({
@@ -20,6 +21,7 @@ export function TextField<T extends FieldValues>({
   autoComplete = "off",
   inputMode,
   hint,
+  disabled = false,
 }: TextFieldProps<T>) {
   const hintId = hint ? `${id}-hint` : undefined;
 
@@ -33,8 +35,9 @@ export function TextField<T extends FieldValues>({
         type={type}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        disabled={disabled}
         aria-describedby={hintId}
-        {...stylex.props(formStyles.input)}
+        {...stylex.props(formStyles.input, disabled && formStyles.inputDisabled)}
         {...register(id)}
       />
       {hint && (

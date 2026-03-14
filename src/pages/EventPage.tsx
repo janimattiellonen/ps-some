@@ -1,15 +1,27 @@
-import { useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type PointerEvent,
+  type KeyboardEvent,
+} from "react";
 import * as stylex from "@stylexjs/stylex";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import PageLayout from "../components/common/PageLayout";
+import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
-import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
+import { TextFieldWithControls } from "../components/form/TextFieldWithControls";
 import { TEMPLATE_COLORS } from "../styles/colors";
 import { downloadAsImage } from "../utils/imageDownload";
+import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
+
+type ImageTransform = { x: number; y: number };
+
+const DEFAULT_TRANSFORM: ImageTransform = { x: 0, y: 0 };
 
 const TEMPLATE_WIDTH = 1024;
 const TEMPLATE_HEIGHT = 1270;
@@ -17,8 +29,8 @@ const TEMPLATE_HEIGHT = 1270;
 const CLUB_LOGO_SRC = "/images/ps-logo-white.png";
 
 const VERSIONS = [
-  { id: "standard", label: "Standard" },
-  { id: "overlay", label: "Overlay" },
+  { id: "standard", label: "Standard", disabled: true },
+  { id: "overlay", label: "Overlay", disabled: false },
 ] as const;
 
 type VersionId = (typeof VERSIONS)[number]["id"];
@@ -57,17 +69,42 @@ const TEMPLATES_OVERLAY = [
 
 type TemplateId = "blue" | "pink";
 
+const PREVIEW_MAX_WIDTH = 552;
+
+const FONT_SIZE_DEFAULTS = {
+  title: { value: 64, min: 30, max: 120 },
+  subtitle: { value: 40, min: 20, max: 80 },
+  row: { value: 28, min: 14, max: 56 },
+  overlayRow: { value: 48, min: 20, max: 96 },
+} as const;
+
 const schema = z.object({
   // Standard version fields
   title: z.string().optional(),
+  titleFontSize: z.number().optional(),
+  titleCaps: z.boolean().optional(),
   subtitle: z.string().optional(),
+  subtitleFontSize: z.number().optional(),
+  subtitleCaps: z.boolean().optional(),
   row1: z.string().optional(),
+  row1FontSize: z.number().optional(),
+  row1Caps: z.boolean().optional(),
   row2: z.string().optional(),
+  row2FontSize: z.number().optional(),
+  row2Caps: z.boolean().optional(),
   row3: z.string().optional(),
+  row3FontSize: z.number().optional(),
+  row3Caps: z.boolean().optional(),
   row4: z.string().optional(),
+  row4FontSize: z.number().optional(),
+  row4Caps: z.boolean().optional(),
   // Overlay version fields
   overlayRow1: z.string().optional(),
+  overlayRow1FontSize: z.number().optional(),
+  overlayRow1Caps: z.boolean().optional(),
   overlayRow2: z.string().optional(),
+  overlayRow2FontSize: z.number().optional(),
+  overlayRow2Caps: z.boolean().optional(),
   showOverlay: z.boolean().optional(),
 });
 
@@ -75,10 +112,19 @@ type FormData = z.infer<typeof schema>;
 
 const styles = stylex.create({
   container: {
-    position: "relative",
+    position: "absolute",
+    top: 0,
+    left: 0,
     width: TEMPLATE_WIDTH,
-    maxWidth: "100%",
-    aspectRatio: `${TEMPLATE_WIDTH} / ${TEMPLATE_HEIGHT}`,
+    height: TEMPLATE_HEIGHT,
+    overflow: "hidden",
+    transformOrigin: "top left",
+  },
+  previewScaler: {
+    position: "relative",
+    width: "100%",
+    // Aspect ratio via padding-bottom since the inner container is absolutely positioned
+    paddingBottom: `${String((TEMPLATE_HEIGHT / TEMPLATE_WIDTH) * 100)}%`,
     overflow: "hidden",
   },
   backgroundImage: {
@@ -186,22 +232,19 @@ const styles = stylex.create({
     width: "100%",
   },
   clubLogo: {
-    height: "clamp(3rem, 8vw, 5rem)",
+    height: 80,
     width: "auto",
     marginBottom: "0.5rem",
   },
   title: {
     color: "white",
-    fontSize: "clamp(2rem, 6vw, 4rem)",
     fontWeight: "bold",
     letterSpacing: "0.1em",
-    textTransform: "uppercase",
     margin: 0,
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
   },
   subtitle: {
     color: "white",
-    fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
     fontWeight: "600",
     margin: 0,
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
@@ -214,13 +257,12 @@ const styles = stylex.create({
   },
   infoRow: {
     color: "white",
-    fontSize: "clamp(1rem, 3vw, 1.75rem)",
     fontWeight: "500",
     margin: 0,
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
   },
   previewWrapper: {
-    maxWidth: "600px",
+    maxWidth: PREVIEW_MAX_WIDTH,
     width: "100%",
   },
   // Overlay version styles
@@ -239,16 +281,14 @@ const styles = stylex.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   overlayLogo: {
-    height: "clamp(5rem, 15vw, 10rem)",
+    height: 160,
     width: "auto",
   },
   overlayText: {
     color: "white",
-    fontSize: "clamp(1.5rem, 5vw, 3rem)",
     fontWeight: "bold",
     margin: 0,
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-    textTransform: "uppercase",
     letterSpacing: "0.05em",
   },
   versionSelector: {
@@ -285,24 +325,195 @@ const styles = stylex.create({
       borderColor: "#1d4ed8",
     },
   },
+  versionButtonDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
+    ":hover": {
+      backgroundColor: "#ffffff",
+      borderColor: "#d1d5db",
+    },
+  },
+  error: {
+    fontSize: "0.875rem",
+    color: "#dc2626",
+    marginTop: "0.25rem",
+  },
+  fileInput: {
+    fontSize: "0.875rem",
+    color: "#374151",
+  },
+  uploadedImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    touchAction: "none",
+    userSelect: "none",
+    transformOrigin: "0 0",
+    ":focus": {
+      outline: "4px solid #2563eb",
+      outlineOffset: "4px",
+    },
+  },
+  draggable: {
+    cursor: "grab",
+  },
+  dragging: {
+    cursor: "grabbing",
+  },
+  positionHint: {
+    fontSize: "0.75rem",
+    color: "#6b7280",
+    marginTop: "0.75rem",
+    textAlign: "center",
+    maxWidth: PREVIEW_MAX_WIDTH,
+  },
 });
 
-export default function EventPage() {
+export function EventPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedVersion, setSelectedVersion] = useState<VersionId>("standard");
+  const previewWrapperRef = useRef<HTMLDivElement>(null);
+  const [selectedVersion, _setSelectedVersion] = useState<VersionId>("overlay");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string>("");
+  const [imageTransform, setImageTransform] = useState<ImageTransform>(DEFAULT_TRANSFORM);
+  const [isDragging, setIsDragging] = useState(false);
+  const [displayScale, setDisplayScale] = useState(PREVIEW_MAX_WIDTH / TEMPLATE_WIDTH);
+  const dragStartRef = useRef<{
+    x: number;
+    y: number;
+    transformX: number;
+    transformY: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const wrapper = previewWrapperRef.current;
+    if (!wrapper) {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      const width = entry.contentRect.width;
+      setDisplayScale(Math.min(width / TEMPLATE_WIDTH, 1));
+    });
+
+    observer.observe(wrapper);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageError("");
+
+    if (!file) {
+      return;
+    }
+
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setImageError(validationError.message);
+      e.target.value = "";
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setBackgroundImageUrl(url);
+    setImageTransform(DEFAULT_TRANSFORM);
+  };
+
+  const handlePointerDown = (e: PointerEvent<HTMLImageElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      transformX: imageTransform.x,
+      transformY: imageTransform.y,
+    };
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLImageElement>) => {
+    const dragStart = dragStartRef.current;
+    if (!isDragging || !dragStart) {
+      return;
+    }
+
+    const newX = dragStart.transformX + (e.clientX - dragStart.x) / displayScale;
+    const newY = dragStart.transformY + (e.clientY - dragStart.y) / displayScale;
+
+    setImageTransform((prev) => ({
+      ...prev,
+      x: newX,
+      y: newY,
+    }));
+  };
+
+  const handlePointerUp = (e: PointerEvent<HTMLImageElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+
+  const handleImageKeyDown = (e: KeyboardEvent<HTMLImageElement>) => {
+    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      return;
+    }
+
+    e.preventDefault();
+    const step = e.shiftKey ? 10 : 1;
+
+    setImageTransform((prev) => {
+      switch (e.key) {
+        case "ArrowUp":
+          return { ...prev, y: prev.y - step };
+        case "ArrowDown":
+          return { ...prev, y: prev.y + step };
+        case "ArrowLeft":
+          return { ...prev, x: prev.x - step };
+        case "ArrowRight":
+          return { ...prev, x: prev.x + step };
+        default:
+          return prev;
+      }
+    });
+  };
 
   const { register, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: "",
+      titleFontSize: FONT_SIZE_DEFAULTS.title.value,
+      titleCaps: true,
       subtitle: "",
+      subtitleFontSize: FONT_SIZE_DEFAULTS.subtitle.value,
+      subtitleCaps: false,
       row1: "",
+      row1FontSize: FONT_SIZE_DEFAULTS.row.value,
+      row1Caps: false,
       row2: "",
+      row2FontSize: FONT_SIZE_DEFAULTS.row.value,
+      row2Caps: false,
       row3: "",
+      row3FontSize: FONT_SIZE_DEFAULTS.row.value,
+      row3Caps: false,
       row4: "",
+      row4FontSize: FONT_SIZE_DEFAULTS.row.value,
+      row4Caps: false,
       overlayRow1: "",
+      overlayRow1FontSize: FONT_SIZE_DEFAULTS.overlayRow.value,
+      overlayRow1Caps: true,
       overlayRow2: "",
+      overlayRow2FontSize: FONT_SIZE_DEFAULTS.overlayRow.value,
+      overlayRow2Caps: true,
       showOverlay: true,
     },
   });
@@ -317,7 +528,15 @@ export default function EventPage() {
       : undefined;
 
   const handleDownload = async () => {
-    await downloadAsImage(containerRef.current, "event-poster.png");
+    const el = containerRef.current;
+    if (!el) {
+      return;
+    }
+
+    // Temporarily remove display scale for capture
+    el.style.transform = "none";
+    await downloadAsImage(el, "event-poster.png");
+    el.style.transform = `scale(${String(displayScale)})`;
   };
 
   return (
@@ -337,18 +556,41 @@ export default function EventPage() {
               Event Details
             </h2>
 
-            {/* Version selector */}
             <div {...stylex.props(formStyles.fieldGroup)}>
+              <label htmlFor="eventImage" {...stylex.props(formStyles.label)}>
+                Background photo
+              </label>
+              <input
+                id="eventImage"
+                type="file"
+                accept={IMAGE_VALIDATION.ACCEPTED_EXTENSIONS}
+                onChange={handleImageChange}
+                aria-describedby={imageError ? "eventImage-error" : undefined}
+                {...stylex.props(styles.fileInput)}
+              />
+              {imageError && (
+                <span id="eventImage-error" role="alert" {...stylex.props(styles.error)}>
+                  {imageError}
+                </span>
+              )}
+            </div>
+
+            {/* Version selector (hidden — overlay is the only active version) */}
+            {/* <div {...stylex.props(formStyles.fieldGroup)}>
               <span {...stylex.props(formStyles.label)}>Choose version</span>
               <div {...stylex.props(styles.versionSelector)} role="group">
                 {VERSIONS.map((version) => (
                   <button
                     key={version.id}
                     type="button"
-                    onClick={() => setSelectedVersion(version.id)}
+                    disabled={version.disabled}
+                    onClick={() => {
+                      setSelectedVersion(version.id);
+                    }}
                     {...stylex.props(
                       styles.versionButton,
-                      selectedVersion === version.id && styles.versionButtonSelected
+                      selectedVersion === version.id && styles.versionButtonSelected,
+                      version.disabled && styles.versionButtonDisabled
                     )}
                     aria-pressed={selectedVersion === version.id}
                   >
@@ -356,32 +598,116 @@ export default function EventPage() {
                   </button>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Template selector */}
             <TemplateSelector
               templates={currentTemplates}
               selectedId={selectedTemplate}
               onSelect={setSelectedTemplate}
+              useColorSwatch
             />
 
             {/* Standard version fields */}
             {selectedVersion === "standard" && (
               <>
-                <TextField id="title" label="Title" register={register} />
-                <TextField id="subtitle" label="Subtitle" register={register} />
-                <TextField id="row1" label="Row 1" register={register} />
-                <TextField id="row2" label="Row 2" register={register} />
-                <TextField id="row3" label="Row 3" register={register} />
-                <TextField id="row4" label="Row 4" register={register} />
+                <TextFieldWithControls
+                  textId="title"
+                  label="Title"
+                  fontSizeId="titleFontSize"
+                  capsId="titleCaps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.title.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.title.max}
+                  fontSizeValue={formValues.titleFontSize ?? FONT_SIZE_DEFAULTS.title.value}
+                />
+
+                <TextFieldWithControls
+                  textId="subtitle"
+                  label="Subtitle"
+                  fontSizeId="subtitleFontSize"
+                  capsId="subtitleCaps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.subtitle.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.subtitle.max}
+                  fontSizeValue={formValues.subtitleFontSize ?? FONT_SIZE_DEFAULTS.subtitle.value}
+                />
+
+                <TextFieldWithControls
+                  textId="row1"
+                  label="Row 1"
+                  fontSizeId="row1FontSize"
+                  capsId="row1Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row1FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
+
+                <TextFieldWithControls
+                  textId="row2"
+                  label="Row 2"
+                  fontSizeId="row2FontSize"
+                  capsId="row2Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row2FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
+
+                <TextFieldWithControls
+                  textId="row3"
+                  label="Row 3"
+                  fontSizeId="row3FontSize"
+                  capsId="row3Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row3FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
+
+                <TextFieldWithControls
+                  textId="row4"
+                  label="Row 4"
+                  fontSizeId="row4FontSize"
+                  capsId="row4Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row4FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
               </>
             )}
 
             {/* Overlay version fields */}
             {selectedVersion === "overlay" && (
               <>
-                <TextField id="overlayRow1" label="Text row 1" register={register} />
-                <TextField id="overlayRow2" label="Text row 2" register={register} />
+                <TextFieldWithControls
+                  textId="overlayRow1"
+                  label="Text row 1"
+                  fontSizeId="overlayRow1FontSize"
+                  capsId="overlayRow1Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.overlayRow.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.overlayRow.max}
+                  fontSizeValue={
+                    formValues.overlayRow1FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value
+                  }
+                />
+
+                <TextFieldWithControls
+                  textId="overlayRow2"
+                  label="Text row 2"
+                  fontSizeId="overlayRow2FontSize"
+                  capsId="overlayRow2Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.overlayRow.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.overlayRow.max}
+                  fontSizeValue={
+                    formValues.overlayRow2FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value
+                  }
+                />
+
                 <div {...stylex.props(formStyles.fieldGroup)}>
                   <CheckboxField id="showOverlay" label="Show overlay" register={register} />
                 </div>
@@ -399,92 +725,192 @@ export default function EventPage() {
             Event Poster Preview
           </h2>
 
-          <div {...stylex.props(styles.previewWrapper)}>
-            <div ref={containerRef} {...stylex.props(styles.container)} aria-live="polite">
-              <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
+          <div ref={previewWrapperRef} {...stylex.props(styles.previewWrapper)}>
+            <div {...stylex.props(styles.previewScaler)}>
+              <div
+                ref={containerRef}
+                {...stylex.props(styles.container)}
+                style={{ transform: `scale(${String(displayScale)})` }}
+                aria-live="polite"
+              >
+                <span {...stylex.props(utilityStyles.srOnly)}>Preview updates as you type</span>
 
-              {/* Layer 1: Background image */}
-              <img
-                src="/images/templates/oittaa.png"
-                alt=""
-                role="presentation"
-                {...stylex.props(styles.backgroundImage)}
-              />
+                {/* Layer 1: Background image */}
+                {backgroundImageUrl && (
+                  <>
+                    <img
+                      src={backgroundImageUrl}
+                      alt="Event background photo"
+                      tabIndex={0}
+                      draggable={false}
+                      aria-describedby="image-position-instructions"
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerUp}
+                      onKeyDown={handleImageKeyDown}
+                      style={{
+                        transform: `translate(${String(imageTransform.x)}px, ${String(imageTransform.y)}px)`,
+                      }}
+                      {...stylex.props(
+                        styles.uploadedImage,
+                        styles.draggable,
+                        isDragging && styles.dragging
+                      )}
+                    />
+                    <span id="image-position-instructions" {...stylex.props(utilityStyles.srOnly)}>
+                      Use arrow keys to reposition the image. Hold Shift for larger movements.
+                    </span>
+                  </>
+                )}
 
-              {/* Layer 2: Semi-transparent overlay (always shown for standard, conditional for overlay version) */}
-              {selectedVersion === "standard" && <div {...stylex.props(styles.overlay)} />}
-              {selectedVersion === "overlay" && formValues.showOverlay && (
-                <div
-                  {...stylex.props(styles.overlay)}
-                  style={{ backgroundColor: currentOverlayColor }}
-                />
-              )}
-
-              {/* Standard version layout */}
-              {selectedVersion === "standard" && (
-                <>
-                  {/* Layer 3: Decorative lines */}
-                  <div {...stylex.props(styles.decorativeLinesContainer)}>
-                    <div {...stylex.props(styles.decorativeLine1)} />
-                    <div {...stylex.props(styles.decorativeLine2)} />
-                  </div>
-
-                  {/* Layer 4: Top accent shapes */}
-                  <div {...stylex.props(styles.topAccent2)} />
-                  <div {...stylex.props(styles.topAccent)} />
-
-                  {/* Layer 5: Trapezoid shape with content */}
+                {/* Layer 2: Semi-transparent overlay (always shown for standard, conditional for overlay version) */}
+                {selectedVersion === "standard" && <div {...stylex.props(styles.overlay)} />}
+                {selectedVersion === "overlay" && formValues.showOverlay && (
                   <div
-                    {...stylex.props(styles.trapezoid)}
-                    style={{ backgroundColor: currentTemplateColor }}
-                  >
-                    <div {...stylex.props(styles.contentWrapper)}>
-                      <img src={CLUB_LOGO_SRC} alt="Club logo" {...stylex.props(styles.clubLogo)} />
-                      {formValues.title && (
-                        <h1 {...stylex.props(styles.title)}>{formValues.title}</h1>
-                      )}
-                      {formValues.subtitle && (
-                        <p {...stylex.props(styles.subtitle)}>{formValues.subtitle}</p>
-                      )}
-                      {(formValues.row1 ||
-                        formValues.row2 ||
-                        formValues.row3 ||
-                        formValues.row4) && <div {...stylex.props(styles.divider)} />}
-                      {formValues.row1 && (
-                        <p {...stylex.props(styles.infoRow)}>{formValues.row1}</p>
-                      )}
-                      {formValues.row2 && (
-                        <p {...stylex.props(styles.infoRow)}>{formValues.row2}</p>
-                      )}
-                      {formValues.row3 && (
-                        <p {...stylex.props(styles.infoRow)}>{formValues.row3}</p>
-                      )}
-                      {formValues.row4 && (
-                        <p {...stylex.props(styles.infoRow)}>{formValues.row4}</p>
-                      )}
+                    {...stylex.props(styles.overlay)}
+                    style={{ backgroundColor: currentOverlayColor }}
+                  />
+                )}
+
+                {/* Standard version layout */}
+                {selectedVersion === "standard" && (
+                  <>
+                    {/* Layer 3: Decorative lines */}
+                    <div {...stylex.props(styles.decorativeLinesContainer)}>
+                      <div {...stylex.props(styles.decorativeLine1)} />
+                      <div {...stylex.props(styles.decorativeLine2)} />
                     </div>
+
+                    {/* Layer 4: Top accent shapes */}
+                    <div {...stylex.props(styles.topAccent2)} />
+                    <div {...stylex.props(styles.topAccent)} />
+
+                    {/* Layer 5: Trapezoid shape with content */}
+                    <div
+                      {...stylex.props(styles.trapezoid)}
+                      style={{ backgroundColor: currentTemplateColor }}
+                    >
+                      <div {...stylex.props(styles.contentWrapper)}>
+                        <img
+                          src={CLUB_LOGO_SRC}
+                          alt="Club logo"
+                          {...stylex.props(styles.clubLogo)}
+                        />
+                        {formValues.title && (
+                          <h1
+                            {...stylex.props(styles.title)}
+                            style={{
+                              fontSize: `${String(formValues.titleFontSize)}px`,
+                              textTransform: formValues.titleCaps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.title}
+                          </h1>
+                        )}
+                        {formValues.subtitle && (
+                          <p
+                            {...stylex.props(styles.subtitle)}
+                            style={{
+                              fontSize: `${String(formValues.subtitleFontSize)}px`,
+                              textTransform: formValues.subtitleCaps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.subtitle}
+                          </p>
+                        )}
+                        {(formValues.row1 ??
+                          formValues.row2 ??
+                          formValues.row3 ??
+                          formValues.row4) && <div {...stylex.props(styles.divider)} />}
+                        {formValues.row1 && (
+                          <p
+                            {...stylex.props(styles.infoRow)}
+                            style={{
+                              fontSize: `${String(formValues.row1FontSize)}px`,
+                              textTransform: formValues.row1Caps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.row1}
+                          </p>
+                        )}
+                        {formValues.row2 && (
+                          <p
+                            {...stylex.props(styles.infoRow)}
+                            style={{
+                              fontSize: `${String(formValues.row2FontSize)}px`,
+                              textTransform: formValues.row2Caps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.row2}
+                          </p>
+                        )}
+                        {formValues.row3 && (
+                          <p
+                            {...stylex.props(styles.infoRow)}
+                            style={{
+                              fontSize: `${String(formValues.row3FontSize)}px`,
+                              textTransform: formValues.row3Caps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.row3}
+                          </p>
+                        )}
+                        {formValues.row4 && (
+                          <p
+                            {...stylex.props(styles.infoRow)}
+                            style={{
+                              fontSize: `${String(formValues.row4FontSize)}px`,
+                              textTransform: formValues.row4Caps ? "uppercase" : "none",
+                            }}
+                          >
+                            {formValues.row4}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Layer 6: Bottom accent shape */}
+                    <div {...stylex.props(styles.bottomAccent)} />
+                  </>
+                )}
+
+                {/* Overlay version layout */}
+                {selectedVersion === "overlay" && (
+                  <div {...stylex.props(styles.overlayContentWrapper)}>
+                    <img
+                      src={CLUB_LOGO_SRC}
+                      alt="Club logo"
+                      {...stylex.props(styles.overlayLogo)}
+                    />
+                    {formValues.overlayRow1 && (
+                      <p
+                        {...stylex.props(styles.overlayText)}
+                        style={{
+                          fontSize: `${String(formValues.overlayRow1FontSize)}px`,
+                          textTransform: formValues.overlayRow1Caps ? "uppercase" : "none",
+                        }}
+                      >
+                        {formValues.overlayRow1}
+                      </p>
+                    )}
+                    {formValues.overlayRow2 && (
+                      <p
+                        {...stylex.props(styles.overlayText)}
+                        style={{
+                          fontSize: `${String(formValues.overlayRow2FontSize)}px`,
+                          textTransform: formValues.overlayRow2Caps ? "uppercase" : "none",
+                        }}
+                      >
+                        {formValues.overlayRow2}
+                      </p>
+                    )}
                   </div>
+                )}
 
-                  {/* Layer 6: Bottom accent shape */}
-                  <div {...stylex.props(styles.bottomAccent)} />
-                </>
-              )}
-
-              {/* Overlay version layout */}
-              {selectedVersion === "overlay" && (
-                <div {...stylex.props(styles.overlayContentWrapper)}>
-                  <img src={CLUB_LOGO_SRC} alt="Club logo" {...stylex.props(styles.overlayLogo)} />
-                  {formValues.overlayRow1 && (
-                    <p {...stylex.props(styles.overlayText)}>{formValues.overlayRow1}</p>
-                  )}
-                  {formValues.overlayRow2 && (
-                    <p {...stylex.props(styles.overlayText)}>{formValues.overlayRow2}</p>
-                  )}
-                </div>
-              )}
-
-              {/* Layer 7: Inset border frame */}
-              <div {...stylex.props(styles.imageBorder)} />
+                {/* Layer 7: Inset border frame */}
+                <div {...stylex.props(styles.imageBorder)} />
+              </div>
             </div>
           </div>
 
@@ -496,6 +922,13 @@ export default function EventPage() {
           >
             Download image
           </button>
+
+          {backgroundImageUrl && (
+            <p {...stylex.props(styles.positionHint)}>
+              Drag the image to reposition, or use arrow keys when focused. Hold Shift for larger
+              movements.
+            </p>
+          )}
         </div>
       </div>
     </PageLayout>

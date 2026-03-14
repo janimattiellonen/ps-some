@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import * as stylex from "@stylexjs/stylex";
+import { TEMPLATE_COLORS } from "../styles/colors";
 
 const FEATURES = [
   {
@@ -10,6 +11,9 @@ const FEATURES = [
     templates: [
       { src: "/images/templates/player-profile-green.png", label: "Green" },
       { src: "/images/templates/player-profile-pink.png", label: "Pink" },
+      { src: "/images/templates/player-profile-blue.png", label: "Blue" },
+      { src: "/images/templates/player-profile-golden.png", label: "Golden" },
+      { src: "/images/templates/player-profile-gray.png", label: "Gray" },
     ],
   },
   {
@@ -23,11 +27,24 @@ const FEATURES = [
     ],
   },
   {
+    id: "scores2",
+    title: "Competition Scores 2",
+    description: "Share competition results and leaderboards",
+    route: "/scores2",
+    templates: [
+      { src: "/images/templates/scores-blue.png", label: "Blue" },
+      { src: "/images/templates/scores-green.png", label: "Green" },
+    ],
+  },
+  {
     id: "event",
     title: "Event Poster",
     description: "Create event announcement posters",
     route: "/event",
-    templates: [{ src: "/images/templates/oittaa.png", label: "Forest" }],
+    templates: [
+      { color: TEMPLATE_COLORS.blue.solid, label: "Blue" },
+      { color: TEMPLATE_COLORS.pink.solid, label: "Pink" },
+    ],
   },
 ] as const;
 
@@ -94,8 +111,12 @@ const styles = stylex.create({
   },
   templatesContainer: {
     display: "flex",
-    gap: "1rem",
+    flexWrap: "wrap",
+    gap: "0.5rem",
     justifyContent: "center",
+    maxWidth: 280,
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   templatePreview: {
     display: "flex",
@@ -104,9 +125,9 @@ const styles = stylex.create({
     gap: "0.5rem",
   },
   templateImage: {
-    width: 120,
+    width: 80,
     height: "auto",
-    borderRadius: "0.5rem",
+    borderRadius: "0.375rem",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
   templateLabel: {
@@ -114,9 +135,15 @@ const styles = stylex.create({
     color: "#9ca3af",
     fontWeight: "500",
   },
+  templateColorSwatch: {
+    width: 80,
+    height: 100,
+    borderRadius: "0.375rem",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
 });
 
-export default function Dashboard() {
+export function Dashboard() {
   const navigate = useNavigate();
 
   return (
@@ -149,11 +176,19 @@ export default function Dashboard() {
             <div {...stylex.props(styles.templatesContainer)}>
               {feature.templates.map((template) => (
                 <div key={template.label} {...stylex.props(styles.templatePreview)}>
-                  <img
-                    src={template.src}
-                    alt={`${template.label} template preview`}
-                    {...stylex.props(styles.templateImage)}
-                  />
+                  {"src" in template ? (
+                    <img
+                      src={template.src}
+                      alt={`${template.label} template preview`}
+                      {...stylex.props(styles.templateImage)}
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      style={{ backgroundColor: template.color }}
+                      {...stylex.props(styles.templateColorSwatch)}
+                    />
+                  )}
                   <span {...stylex.props(styles.templateLabel)}>{template.label}</span>
                 </div>
               ))}
