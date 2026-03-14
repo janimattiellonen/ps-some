@@ -13,9 +13,8 @@ import { z } from "zod";
 import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
-import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
-import { FontSizeSlider } from "../components/form/FontSizeSlider";
+import { TextFieldWithControls } from "../components/form/TextFieldWithControls";
 import { TEMPLATE_COLORS } from "../styles/colors";
 import { downloadAsImage } from "../utils/imageDownload";
 import { IMAGE_VALIDATION, validateImageFile } from "../utils/fileValidation";
@@ -30,8 +29,8 @@ const TEMPLATE_HEIGHT = 1270;
 const CLUB_LOGO_SRC = "/images/ps-logo-white.png";
 
 const VERSIONS = [
-  { id: "standard", label: "Standard" },
-  { id: "overlay", label: "Overlay" },
+  { id: "standard", label: "Standard", disabled: true },
+  { id: "overlay", label: "Overlay", disabled: false },
 ] as const;
 
 type VersionId = (typeof VERSIONS)[number]["id"];
@@ -326,6 +325,14 @@ const styles = stylex.create({
       borderColor: "#1d4ed8",
     },
   },
+  versionButtonDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
+    ":hover": {
+      backgroundColor: "#ffffff",
+      borderColor: "#d1d5db",
+    },
+  },
   error: {
     fontSize: "0.875rem",
     color: "#dc2626",
@@ -363,17 +370,12 @@ const styles = stylex.create({
     textAlign: "center",
     maxWidth: PREVIEW_MAX_WIDTH,
   },
-  textFieldGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.375rem",
-  },
 });
 
 export function EventPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const previewWrapperRef = useRef<HTMLDivElement>(null);
-  const [selectedVersion, setSelectedVersion] = useState<VersionId>("standard");
+  const [selectedVersion, _setSelectedVersion] = useState<VersionId>("overlay");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("blue");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
@@ -573,20 +575,22 @@ export function EventPage() {
               )}
             </div>
 
-            {/* Version selector */}
-            <div {...stylex.props(formStyles.fieldGroup)}>
+            {/* Version selector (hidden — overlay is the only active version) */}
+            {/* <div {...stylex.props(formStyles.fieldGroup)}>
               <span {...stylex.props(formStyles.label)}>Choose version</span>
               <div {...stylex.props(styles.versionSelector)} role="group">
                 {VERSIONS.map((version) => (
                   <button
                     key={version.id}
                     type="button"
+                    disabled={version.disabled}
                     onClick={() => {
                       setSelectedVersion(version.id);
                     }}
                     {...stylex.props(
                       styles.versionButton,
-                      selectedVersion === version.id && styles.versionButtonSelected
+                      selectedVersion === version.id && styles.versionButtonSelected,
+                      version.disabled && styles.versionButtonDisabled
                     )}
                     aria-pressed={selectedVersion === version.id}
                   >
@@ -594,7 +598,7 @@ export function EventPage() {
                   </button>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Template selector */}
             <TemplateSelector
@@ -607,146 +611,102 @@ export function EventPage() {
             {/* Standard version fields */}
             {selectedVersion === "standard" && (
               <>
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="title" label="Title" register={register} />
-                  <FontSizeSlider
-                    id="titleFontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.title.min}
-                    max={FONT_SIZE_DEFAULTS.title.max}
-                    value={formValues.titleFontSize ?? FONT_SIZE_DEFAULTS.title.value}
-                  />
-                  <CheckboxField
-                    id="titleCaps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="title"
+                  label="Title"
+                  fontSizeId="titleFontSize"
+                  capsId="titleCaps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.title.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.title.max}
+                  fontSizeValue={formValues.titleFontSize ?? FONT_SIZE_DEFAULTS.title.value}
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="subtitle" label="Subtitle" register={register} />
-                  <FontSizeSlider
-                    id="subtitleFontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.subtitle.min}
-                    max={FONT_SIZE_DEFAULTS.subtitle.max}
-                    value={formValues.subtitleFontSize ?? FONT_SIZE_DEFAULTS.subtitle.value}
-                  />
-                  <CheckboxField
-                    id="subtitleCaps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="subtitle"
+                  label="Subtitle"
+                  fontSizeId="subtitleFontSize"
+                  capsId="subtitleCaps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.subtitle.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.subtitle.max}
+                  fontSizeValue={formValues.subtitleFontSize ?? FONT_SIZE_DEFAULTS.subtitle.value}
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="row1" label="Row 1" register={register} />
-                  <FontSizeSlider
-                    id="row1FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.row.min}
-                    max={FONT_SIZE_DEFAULTS.row.max}
-                    value={formValues.row1FontSize ?? FONT_SIZE_DEFAULTS.row.value}
-                  />
-                  <CheckboxField
-                    id="row1Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="row1"
+                  label="Row 1"
+                  fontSizeId="row1FontSize"
+                  capsId="row1Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row1FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="row2" label="Row 2" register={register} />
-                  <FontSizeSlider
-                    id="row2FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.row.min}
-                    max={FONT_SIZE_DEFAULTS.row.max}
-                    value={formValues.row2FontSize ?? FONT_SIZE_DEFAULTS.row.value}
-                  />
-                  <CheckboxField
-                    id="row2Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="row2"
+                  label="Row 2"
+                  fontSizeId="row2FontSize"
+                  capsId="row2Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row2FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="row3" label="Row 3" register={register} />
-                  <FontSizeSlider
-                    id="row3FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.row.min}
-                    max={FONT_SIZE_DEFAULTS.row.max}
-                    value={formValues.row3FontSize ?? FONT_SIZE_DEFAULTS.row.value}
-                  />
-                  <CheckboxField
-                    id="row3Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="row3"
+                  label="Row 3"
+                  fontSizeId="row3FontSize"
+                  capsId="row3Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row3FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="row4" label="Row 4" register={register} />
-                  <FontSizeSlider
-                    id="row4FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.row.min}
-                    max={FONT_SIZE_DEFAULTS.row.max}
-                    value={formValues.row4FontSize ?? FONT_SIZE_DEFAULTS.row.value}
-                  />
-                  <CheckboxField
-                    id="row4Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="row4"
+                  label="Row 4"
+                  fontSizeId="row4FontSize"
+                  capsId="row4Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.row.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.row.max}
+                  fontSizeValue={formValues.row4FontSize ?? FONT_SIZE_DEFAULTS.row.value}
+                />
               </>
             )}
 
             {/* Overlay version fields */}
             {selectedVersion === "overlay" && (
               <>
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="overlayRow1" label="Text row 1" register={register} />
-                  <FontSizeSlider
-                    id="overlayRow1FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.overlayRow.min}
-                    max={FONT_SIZE_DEFAULTS.overlayRow.max}
-                    value={formValues.overlayRow1FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value}
-                  />
-                  <CheckboxField
-                    id="overlayRow1Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="overlayRow1"
+                  label="Text row 1"
+                  fontSizeId="overlayRow1FontSize"
+                  capsId="overlayRow1Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.overlayRow.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.overlayRow.max}
+                  fontSizeValue={
+                    formValues.overlayRow1FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value
+                  }
+                />
 
-                <div {...stylex.props(styles.textFieldGroup)}>
-                  <TextField id="overlayRow2" label="Text row 2" register={register} />
-                  <FontSizeSlider
-                    id="overlayRow2FontSize"
-                    register={register}
-                    min={FONT_SIZE_DEFAULTS.overlayRow.min}
-                    max={FONT_SIZE_DEFAULTS.overlayRow.max}
-                    value={formValues.overlayRow2FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value}
-                  />
-                  <CheckboxField
-                    id="overlayRow2Caps"
-                    label="Use CAPS"
-                    register={register}
-                    variant="compact"
-                  />
-                </div>
+                <TextFieldWithControls
+                  textId="overlayRow2"
+                  label="Text row 2"
+                  fontSizeId="overlayRow2FontSize"
+                  capsId="overlayRow2Caps"
+                  register={register}
+                  fontSizeMin={FONT_SIZE_DEFAULTS.overlayRow.min}
+                  fontSizeMax={FONT_SIZE_DEFAULTS.overlayRow.max}
+                  fontSizeValue={
+                    formValues.overlayRow2FontSize ?? FONT_SIZE_DEFAULTS.overlayRow.value
+                  }
+                />
 
                 <div {...stylex.props(formStyles.fieldGroup)}>
                   <CheckboxField id="showOverlay" label="Show overlay" register={register} />

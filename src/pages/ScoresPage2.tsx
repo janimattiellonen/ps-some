@@ -6,9 +6,8 @@ import { z } from "zod";
 import { PageLayout } from "../components/common/PageLayout";
 import { layoutStyles, formStyles, typographyStyles, utilityStyles } from "../styles/shared";
 import { TemplateSelector } from "../components/form/TemplateSelector";
-import { TextField } from "../components/form/TextField";
 import { CheckboxField } from "../components/form/CheckboxField";
-import { FontSizeSlider } from "../components/form/FontSizeSlider";
+import { TextFieldWithControls } from "../components/form/TextFieldWithControls";
 import { downloadAsImage } from "../utils/imageDownload";
 
 const TEMPLATE_WIDTH = 419;
@@ -60,10 +59,13 @@ const SCORE_ROWS = [
 const schema = z.object({
   titleRow1: z.string().optional(),
   titleRow1FontSize: z.number().optional(),
+  titleRow1Caps: z.boolean().optional(),
   titleRow2: z.string().optional(),
   titleRow2FontSize: z.number().optional(),
+  titleRow2Caps: z.boolean().optional(),
   titleRow3: z.string().optional(),
   titleRow3FontSize: z.number().optional(),
+  titleRow3Caps: z.boolean().optional(),
   row1: z.string().optional(),
   row1Member: z.boolean().optional(),
   row2: z.string().optional(),
@@ -145,16 +147,6 @@ const styles = stylex.create({
     color: "#ffffff",
     textAlign: "center",
     fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  resultsLabel: {
-    color: "#ffffff",
-    textAlign: "center",
-    fontSize: "clamp(0.75rem, 3vw, 1rem)",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    marginTop: 4,
   },
   scoreRowBase: {
     position: "absolute",
@@ -180,11 +172,6 @@ const styles = stylex.create({
     backgroundColor: "rgba(0, 0, 0, 0.3)",
     borderRadius: "50%",
     padding: "0.15em",
-  },
-  textFieldGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.375rem",
   },
   inputRow: {
     display: "flex",
@@ -220,10 +207,13 @@ export function ScoresPage2() {
     defaultValues: {
       titleRow1: "",
       titleRow1FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow1Caps: true,
       titleRow2: "",
       titleRow2FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow2Caps: true,
       titleRow3: "",
       titleRow3FontSize: FONT_SIZE_DEFAULTS.titleRow.value,
+      titleRow3Caps: true,
       row1: "",
       row1Member: false,
       row2: "",
@@ -262,36 +252,36 @@ export function ScoresPage2() {
               Competition Scores
             </h2>
 
-            <div {...stylex.props(styles.textFieldGroup)}>
-              <TextField id="titleRow1" label="Title row 1" register={register} />
-              <FontSizeSlider
-                id="titleRow1FontSize"
-                register={register}
-                min={FONT_SIZE_DEFAULTS.titleRow.min}
-                max={FONT_SIZE_DEFAULTS.titleRow.max}
-                value={formValues.titleRow1FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
-              />
-            </div>
-            <div {...stylex.props(styles.textFieldGroup)}>
-              <TextField id="titleRow2" label="Title row 2" register={register} />
-              <FontSizeSlider
-                id="titleRow2FontSize"
-                register={register}
-                min={FONT_SIZE_DEFAULTS.titleRow.min}
-                max={FONT_SIZE_DEFAULTS.titleRow.max}
-                value={formValues.titleRow2FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
-              />
-            </div>
-            <div {...stylex.props(styles.textFieldGroup)}>
-              <TextField id="titleRow3" label="Title row 3" register={register} />
-              <FontSizeSlider
-                id="titleRow3FontSize"
-                register={register}
-                min={FONT_SIZE_DEFAULTS.titleRow.min}
-                max={FONT_SIZE_DEFAULTS.titleRow.max}
-                value={formValues.titleRow3FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
-              />
-            </div>
+            <TextFieldWithControls
+              textId="titleRow1"
+              label="Title row 1"
+              fontSizeId="titleRow1FontSize"
+              capsId="titleRow1Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow1FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
+            <TextFieldWithControls
+              textId="titleRow2"
+              label="Title row 2"
+              fontSizeId="titleRow2FontSize"
+              capsId="titleRow2Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow2FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
+            <TextFieldWithControls
+              textId="titleRow3"
+              label="Title row 3"
+              fontSizeId="titleRow3FontSize"
+              capsId="titleRow3Caps"
+              register={register}
+              fontSizeMin={FONT_SIZE_DEFAULTS.titleRow.min}
+              fontSizeMax={FONT_SIZE_DEFAULTS.titleRow.max}
+              fontSizeValue={formValues.titleRow3FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value}
+            />
 
             {SCORE_ROWS.map(({ num, rowKey, memberKey }) => (
               <div key={num} {...stylex.props(formStyles.fieldGroup)}>
@@ -363,6 +353,7 @@ export function ScoresPage2() {
                     {...stylex.props(styles.titleRow)}
                     style={{
                       fontSize: `${String(formValues.titleRow1FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow1Caps ? "uppercase" : "none",
                     }}
                   >
                     {formValues.titleRow1}
@@ -373,6 +364,7 @@ export function ScoresPage2() {
                     {...stylex.props(styles.titleRow)}
                     style={{
                       fontSize: `${String(formValues.titleRow2FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow2Caps ? "uppercase" : "none",
                     }}
                   >
                     {formValues.titleRow2}
@@ -383,12 +375,12 @@ export function ScoresPage2() {
                     {...stylex.props(styles.titleRow)}
                     style={{
                       fontSize: `${String(formValues.titleRow3FontSize ?? FONT_SIZE_DEFAULTS.titleRow.value)}px`,
+                      textTransform: formValues.titleRow3Caps ? "uppercase" : "none",
                     }}
                   >
                     {formValues.titleRow3}
                   </span>
                 )}
-                <span {...stylex.props(styles.resultsLabel)}>Tulokset</span>
               </div>
             )}
             {SCORE_ROWS.map(({ num, rowKey, memberKey, style }) => {
